@@ -4,9 +4,9 @@ import bcrypt from "bcryptjs";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !role) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
@@ -28,6 +28,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role: role === "recruiter" ? "recruiter" : "seeker",
     });
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
