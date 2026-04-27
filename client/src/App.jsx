@@ -1,10 +1,12 @@
 import Auth from "./pages/Auth";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { RecruiterDashboard } from "./pages/RecruiterDashboard";
-import { AdminDashboard } from "./pages/AdminDashboard";
-import { SeekerDashboard } from "./pages/SeekerDashboard";
+import RecruiterDashboard from "./pages/RecruiterDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import SeekerDashboard from "./pages/SeekerDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
+import JobDetails from "./pages/JobDetails";
+import Profile from "./pages/Profile";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +42,26 @@ const router = createBrowserRouter([
         <>
           <Navbar />
           <SeekerDashboard />
+        </>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/jobs",
+    element: (
+      <>
+        <Navbar />
+        <JobDetails />
+      </>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute allowedRole="seeker">
+        <>
+          <Navbar />
+          <Profile />
         </>
       </ProtectedRoute>
     ),
