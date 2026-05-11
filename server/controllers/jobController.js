@@ -74,3 +74,41 @@ export const getJobById = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found",
+      });
+    }
+
+    if (req.user.role !== "recruiter") {
+      return res.status(403).json({
+        success: false,
+        message: "Only recruiters can delete job",
+      });
+    }
+
+    if (job.postedBy.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete your own jobs",
+      });
+    }
+
+    await job.deleteOne();
+
+    res
+      .status(200)
+      .json({ success: true, message: "Job deleted successfully." });
+  } catch (error) {
+    res.status.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

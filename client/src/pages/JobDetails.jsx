@@ -1,32 +1,153 @@
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
 import { Button } from "@/components/ui/button";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Briefcase,
+  Building2,
+  Clock3,
+  IndianRupee,
+  MapPin,
+  User2,
+} from "lucide-react";
 
 const JobDetails = () => {
   const { id } = useParams();
   const [job, setJob] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [applied, setApplied] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const res = await api.get("/jobs");
-      const found = res.data.jobs.find((j) => j._id === id);
-      setJob(found);
+      try {
+        const res = await api.get(`/jobs/${id}`);
+        setJob(res.data.job);
+      } catch (error) {
+        toast.error("Failed to load job");
+      }
     };
     fetchJobs();
   }, [id]);
 
-  if (!job) return <p className="p-10">Loading...</p>;
+  const handleApply = async () => {
+    try {
+      const res = await api.post("/application/apply", {
+        jobId: job._id,
+      });
+      toast.success(res.data.message);
+      setApplied(true);
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+
+      if (error.response?.data?.message === "Already applied") setApplied(true);
+    }
+  };
+
+  if (!job)
+    return (
+      <p className="min-h-screen flex items-center justify-center">
+        Loading...
+      </p>
+    );
 
   return (
-    <div className="p-10 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">{job.title}</h1>
-      <p className="text-gray-600 mb-2">{job.company}</p>
-      <p className=" text-gray-500 mb-2">{job.location}</p>
-      <p className="mb-4">{job.description}</p>
-      <Button className="mt-3 bg-purple-600 text-white px-4 py-1 rounded-none hover:bg-purple-700">
-        Apply
-      </Button>{" "}
+    <div className="p-6  min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
+      <Card className="max-w-5xl mx-auto shadow-2xl border-0 bg-white/80 backdrop-blur-md">
+        <CardContent className="p-8 flex flex-col gap-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg">
+                <Briefcase className="text-white w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">
+                  {job.title}
+                </h1>
+
+                <div className="flex flex-wrap gap-4 mt-3 text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <Building2 className="w-4 h-4 text-purple-600" />
+                    {job.company}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-4 h-4 text-purple-600" />
+                    {job.location}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <IndianRupee className="w-4 h-4 text-green-600" />
+                    {job.salary || "Not diclosed"}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {user?.role === "recruiter" ? (
+              <Button
+                onClick={() => navigate(`/applicants/${job._id}`)}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                View Applicants
+              </Button>
+            ) : (
+              <Button
+                onClick={handleApply}
+                disabled={applied}
+                className={`transition-all duration-200 ${
+                  applied
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-purple-600 hover:bg-purple-700 hover:scale-105 "
+                }`}
+              >
+                {applied ? "Applied" : " Apply Now"}
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-3 flex-wrap">
+            <div className="px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+              {job.jobType}
+            </div>
+            <div className="px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium flex items-center gap-1">
+              <Clock3 className="w-4 h-4" />
+              Posted Recently
+            </div>
+          </div>
+          {/* Description */}
+          <div className="bg-white/70 rounded-2xl p-6 shadow-sm border">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              Job Description
+            </h2>
+            <p
+              className={`text-gray-700 leading-7 whitespace-pre-line transition-all duration-300 ${showFullDescription ? "" : "line-clamp-3"}`}
+            >
+              {job.description}
+            </p>
+            {job.description.length > 150 && (
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="mt-3 text-purple-600 hover:text-purple-700 font-medium transition-all duration-500 ease-in-out"
+              >
+                {showFullDescription ? "Show Less" : "Read More"}
+              </button>
+            )}
+          </div>
+          {/* Recruiter Information */}
+          <div className="bg-indigo-50 rounded-2xl p-5 border border-indigo-100">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">
+              Recruiter Information
+            </h2>
+
+            <div className="flex items-center gap-2 text-gray-700 ">
+              <User2 className="w-4 h-4 text-indigo-600" />
+              <span>
+                {job.postedBy?.name} ({job.postedBy?.email})
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

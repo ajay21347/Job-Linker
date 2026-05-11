@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import applicationRoutes from "./routes/applicationRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/jobs", jobRoutes);
+app.use("/api/v1/application", applicationRoutes);
 
 const startServer = async () => {
   try {

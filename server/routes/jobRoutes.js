@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createJob,
+  deleteJob,
   getJobById,
   getJobs,
 } from "../controllers/jobController.js";
@@ -13,5 +14,7 @@ router.post("/create", protect, createJob);
 router.get("/", getJobs);
 
 router.get("/:id", getJobById);
+
+router.delete("/delete/:id", protect, deleteJob);
 
 export default router;

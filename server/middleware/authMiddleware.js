@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 export const protect = (req, res, next) => {
-  console.log("🔥 Middleware hit"); // ADD THIS
+ 
 
   const token = req.headers.authorization?.split(" ")[1];
   console.log("TOKEN:", token);

@@ -7,6 +7,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import JobDetails from "./pages/JobDetails";
 import Profile from "./pages/Profile";
+import CreateJob from "./pages/CreateJob";
+import Applicants from "./pages/Applicants";
 
 const router = createBrowserRouter([
   {
@@ -47,7 +49,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/jobs",
+    path: "/job/:id",
     element: (
       <>
         <Navbar />
@@ -64,6 +66,26 @@ const router = createBrowserRouter([
           <Profile />
         </>
       </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/create-job",
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <>
+          <Navbar />
+          <CreateJob />
+        </>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/applicants/:jobId",
+    element: (
+      <>
+        <Navbar />
+        <Applicants />
+      </>
     ),
   },
 ]);
