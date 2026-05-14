@@ -90,7 +90,7 @@ const JobDetails = () => {
                   <div className="flex items-center gap-1">
                     <IndianRupee className="w-4 h-4 text-green-600" />
                     {job.salary
-                      ? `${job.salary.toLocaleString()} P.A.`
+                      ? `${job.salary.toLocaleString("en-IN")} P.A.`
                       : "Not disclosed"}
                   </div>
                 </div>

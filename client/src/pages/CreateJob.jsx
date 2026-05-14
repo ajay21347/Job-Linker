@@ -129,7 +129,7 @@ const CreateJob = () => {
               </SelectTrigger>
               <SelectContent
                 position="popper"
-                className="z-50 shadow-lg border"
+                className="z-50 bg-white shadow-lg border"
               >
                 <SelectItem value="full-time">Full Time</SelectItem>
                 <SelectItem value="part-time">Part Time</SelectItem>
@@ -143,7 +143,7 @@ const CreateJob = () => {
             name="description"
             placeholder="Job Description...."
             onChange={handleChange}
-            className="w-full border rounded p-3 resize-none h-28 bg-white/70 focus:ring-2 focus:ring-indigo-400"
+            className="w-full border rounded p-3 resize-none h-28 bg-white/70 focus:ring-2 focus:ring-indigo-400 relative z-0"
           />
 
           <div className="flex justify-end gap-3">

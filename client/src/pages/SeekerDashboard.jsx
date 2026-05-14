@@ -54,7 +54,7 @@ const SeekerDashboard = () => {
               <div className="flex items-center gap-2 text-sm text-green-500">
                 <IndianRupee className="w-4 h-4" />
                 {job.salary
-                  ? `${job.salary.toLocaleString()} P.A.`
+                  ? `${job.salary.toLocaleString("en-IN")} P.A.`
                   : "Not disclosed"}
               </div>
               <div className="flex items-center gap-2 text-sm text-purple-500">

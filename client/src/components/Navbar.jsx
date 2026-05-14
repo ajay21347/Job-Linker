@@ -1,5 +1,6 @@
 import { Home, LogOut, User2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -10,7 +11,11 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/";
+
+    toast.success("Logged out successfully");
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1000);
   };
 
   const isActive = (path) => location.pathname === path;
@@ -26,7 +31,15 @@ const Navbar = () => {
       </h1>
       <div className="flex items-center gap-6">
         <div
-          onClick={() => navigate("/seeker-dashboard")}
+          onClick={() => {
+            if (user?.role === "recruiter") {
+              navigate("/recruiter-dashboard");
+            } else if (user?.role === "admin") {
+              navigate("/admin-dashboard");
+            } else {
+              navigate("/seeker-dashboard");
+            }
+          }}
           className={`flex items-center gap-1 cursor-pointer hover:text-gray-200 ${isActive("/seeker-dashboard") ? "font-bold underline" : ""}`}
         >
           <Home className="w-5 h-5" />

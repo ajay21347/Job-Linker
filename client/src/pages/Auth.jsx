@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-import { Briefcase, User } from "lucide-react";
+import { Briefcase, Eye, EyeOff, User } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,6 +16,9 @@ const Auth = () => {
     role: "seeker",
   });
 
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -23,25 +28,33 @@ const Auth = () => {
 
     try {
       const res = await axios.post(url, data);
-      console.log(res.data);
-      alert(isLogin ? "Login Successful" : "Regsitered Successfully");
+      if (!isLogin) {
+        toast.success("Registered Successfully");
+
+        setTimeout(() => {
+          setIsLogin(true);
+        }, 1000);
+        return;
+      }
 
       if (isLogin) {
         localStorage.setItem("token", res.data.accessToken);
         localStorage.setItem("user", JSON.stringify(res.data.user));
+        const firstName = res.data.user.name.split(" ")[0];
+        toast.success(`Welcome back, ${firstName}`);
 
         const role = res.data.user.role;
 
         if (role === "admin") {
-          window.location.href = "/admin-dashboard";
+          navigate("/admin-dashboard");
         } else if (role === "recruiter") {
-          window.location.href = "/recruiter-dashboard";
+          navigate("/recruiter-dashboard");
         } else {
-          window.location.href = "/seeker-dashboard";
+          navigate("/seeker-dashboard");
         }
       }
     } catch (err) {
-      alert(err.response?.data?.message);
+      toast.error(err.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -83,11 +96,24 @@ const Auth = () => {
           </div>
           <div>
             <label className="block mb-2 text-sm">Password</label>{" "}
-            <Input
-              type="password"
-              className="h-12"
-              onChange={(e) => setData({ ...data, password: e.target.value })}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                className="h-12 pr-12 focus:ring-2 focus:ring-purple-400"
+                onChange={(e) => setData({ ...data, password: e.target.value })}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5 hover:text-purple-600 transition-colors duration-200" />
+                )}
+              </button>
+            </div>
           </div>
           {isLogin && (
             <div className="flex justify-between text-sm">

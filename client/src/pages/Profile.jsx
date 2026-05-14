@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import api from "@/utils/api";
 import { Download, Eye, FileText, Mail, Phone, User2 } from "lucide-react";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 const Profile = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -28,9 +30,19 @@ const Profile = () => {
     }
   };
 
-  const handleSave = () => {
-    localStorage.setItem("user", JSON.stringify(user));
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const res = await api.put("/user/profile", user);
+
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      setUser(res.data.user);
+      toast.success("Profile updated successfully");
+
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    }
   };
 
   return (

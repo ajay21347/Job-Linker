@@ -79,7 +79,7 @@ const RecruiterDashboard = () => {
           {jobs.map((job) => (
             <Card
               key={job._id}
-              className="hover:shadow-xl transition-all duration-300 "
+              className="hover:shadow-2xl hover:scale-105 transition-all duration-300 "
             >
               <CardContent className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ const RecruiterDashboard = () => {
                 <div className="flex justify-between mt-3">
                   <span className="text-sm text-green-600">
                     ₹
-                    {job.salary ? `${job.salary.toLocaleString()} P.A.` : "N/A"}
+                    {job.salary ? `${job.salary.toLocaleString("en-IN")} P.A.` : "N/A"}
                   </span>
                   <span className="text-sm text-purple-600">
                     {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}

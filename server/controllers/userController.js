@@ -79,12 +79,6 @@ export const login = async (req, res) => {
         .json({ success: false, message: "Invalid  Credentials" });
     }
 
-    // if (existingUser.isVerified === false) {
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, message: "Verify your account, then login" });
-    // }
-
     const accessToken = jwt.sign(
       { id: existingUser._id, role: existingUser.role },
       process.env.JWT_SECRET,
@@ -101,15 +95,6 @@ export const login = async (req, res) => {
 
     existingUser.isLoggedIn = true;
     await existingUser.save();
-
-    // const exisitingSession = await sessionStorage.findOne({
-    //   userId: existingUser._id,
-    // });
-    // if (exisitingSession) {
-    //   await sessionStorage.deleteOne({ userId: existingUser._id });
-    // // }
-
-    // await sessionStorage.create({ userId: existingUser._id });
 
     res.status(200).json({
       success: true,
@@ -128,5 +113,31 @@ export const login = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, bio, resume } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        name,
+        email,
+        phone,
+        bio,
+        resume,
+      },
+      { returnDocument: "after" },
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
