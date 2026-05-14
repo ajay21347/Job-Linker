@@ -22,7 +22,7 @@ const Navbar = () => {
         onClick={() => navigate("/seeker-dashboard")}
         className="text-xl font-bold cursor-pointer"
       >
-        Job Portal
+        Job Linker
       </h1>
       <div className="flex items-center gap-6">
         <div

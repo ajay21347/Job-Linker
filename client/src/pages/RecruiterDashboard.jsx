@@ -5,7 +5,19 @@ import { Briefcase, MapPin, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
+import { getDeadlineText, getPostedTime } from "@/utils/jobUtils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogOverlay,
+} from "@/components/ui/alert-dialog";
 const RecruiterDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const navigate = useNavigate();
@@ -28,29 +40,15 @@ const RecruiterDashboard = () => {
     fetchJobs();
   }, []);
 
-  const confirmDelete = (id) => {
-    toast.dismiss();
-
-    toast.error("Are you sure to delete this job post?", {
-      description: "This action cannot be undone.",
-      duration: 10000,
-      action: {
-        label: "Delete",
-        onClick: () => handleDelete(id),
-        className: "bg-red-600 text-white hover:bg-red:700",
-      },
-    });
-  };
-
   const handleDelete = async (id) => {
-    console.log("DELETE CLICKED", id);
     try {
       await api.delete(`/jobs/delete/${id}`);
-      toast.success("Job deleted");
 
-      setJobs((prev) => prev.filter((job) => job._id !== id));
+      setJobs(jobs.filter((job) => job._id !== id));
+
+      toast.success("Job deleted successfully");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error deleting job");
+      toast.error(error.response?.data?.message || "Failed to delete job");
     }
   };
 
@@ -64,7 +62,7 @@ const RecruiterDashboard = () => {
           className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
         >
           <Plus className="w-4 h-4 mr-1" />
-          PostJob
+          Post Job
         </Button>
       </div>
 
@@ -96,9 +94,24 @@ const RecruiterDashboard = () => {
 
                 <div className="flex justify-between mt-3">
                   <span className="text-sm text-green-600">
-                    ₹{job.salary || "N/A"}
+                    ₹
+                    {job.salary ? `${job.salary.toLocaleString()} P.A.` : "N/A"}
                   </span>
-                  <span className="text-sm text-purple-600">{job.jobType}</span>
+                  <span className="text-sm text-purple-600">
+                    {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {getPostedTime(job.createdAt)}
+                </div>
+                <div className="text-sm font-medium">
+                  {getDeadlineText(job.deadline) === "Expired" ? (
+                    <span className="text-red-600">Expired</span>
+                  ) : (
+                    <span className="text-orange-600">
+                      {getDeadlineText(job.deadline)}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex gap-2 mt-3">
@@ -106,18 +119,46 @@ const RecruiterDashboard = () => {
                     size="sm"
                     variant="secondary"
                     onClick={() => navigate(`/job/${job._id}`)}
-                    className="hover:underline"
+                    className="hover:underline  underline-offset-4 hover:text-blue-600
+                    transition-all duration-200"
                   >
                     View
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => confirmDelete(job._id)}
-                    className="hover:underline"
-                  >
-                    Delete
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="hover:underline underline-offset-4 hover:text-red-500 transition-all duration-200"
+                      >
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+
+                    <AlertDialogOverlay className="bg-black/40 backdrop-blur-sm" />
+
+                    <AlertDialogContent className="rounded-2xl bg-white border border-gray-200 shadow-2xl backdrop-blur-none">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Job Post?</AlertDialogTitle>
+
+                        <AlertDialogDescription>
+                          This action cannot be undone. The job post will be
+                          permanently deleted.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                        <AlertDialogAction
+                          onClick={() => handleDelete(job._id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>

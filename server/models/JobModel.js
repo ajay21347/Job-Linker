@@ -7,6 +7,10 @@ const jobSchema = new mongoose.Schema(
     company: { type: String, required: true },
     location: { type: String, required: true },
     salary: { type: Number },
+    deadline: {
+      type: Date,
+      required: true,
+    },
     jobType: {
       type: String,
       enum: ["full-time", "part-time", "internship", "remote"],

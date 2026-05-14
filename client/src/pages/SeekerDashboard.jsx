@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import api from "@/utils/api";
-import { Briefcase, Clipboard, IndianRupee, MapPin } from "lucide-react";
+import { Briefcase, IndianRupee, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getDeadlineText, getPostedTime } from "@/utils/jobUtils";
 
 const SeekerDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -20,12 +20,11 @@ const SeekerDashboard = () => {
   }, []);
 
   const filteredJobs = jobs.filter((job) =>
-    `${jobs.title} ${job.company} ${job.location} ${job.jobType}`
+    `${job.title} ${job.company} ${job.location} ${job.jobType}`
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
 
-  // const user = JSON.parse(localStorage.getItem("user"));
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-8">
       {/* Search */}
@@ -49,16 +48,30 @@ const SeekerDashboard = () => {
               <h2 className="text-lg font-semibold">{job.title}</h2>
               <p className="text-gray-600">{job.company}</p>
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <MapPin className="2-4 h-4" />
+                <MapPin className="w-4 h-4" />
                 {job.location}
               </div>
               <div className="flex items-center gap-2 text-sm text-green-500">
-                <IndianRupee className="2-4 h-4" />
-                {job.salary || "Not disclosed"}
+                <IndianRupee className="w-4 h-4" />
+                {job.salary
+                  ? `${job.salary.toLocaleString()} P.A.`
+                  : "Not disclosed"}
               </div>
               <div className="flex items-center gap-2 text-sm text-purple-500">
-                <Briefcase className="2-4 h-4" />
-                {job.jobType}
+                <Briefcase className="w-4 h-4" />
+                {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}
+              </div>
+              <div className="text-xs text-gray-500">
+                {getPostedTime(job.createdAt)}
+              </div>
+              <div className="text-sm font-medium">
+                {getDeadlineText(job.deadline) === "Expired" ? (
+                  <span className="text-red-600">Expired</span>
+                ) : (
+                  <span className="text-orange-600">
+                    {getDeadlineText(job.deadline)}
+                  </span>
+                )}
               </div>
               <span className="text-purple-600 text-sm mt-2 hover:underline">
                 View Details

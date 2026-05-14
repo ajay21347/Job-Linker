@@ -8,7 +8,12 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   if (!token || !user) {
     return <Navigate to="/" replace />;
   }
-  if (allowedRole && user.role !== allowedRole) {
+
+  const hasAccess = Array.isArray(allowedRole)
+    ? allowedRole.includes(user.role)
+    : user.role === allowedRole;
+
+  if (allowedRole &&  !hasAccess) {
     return <Navigate to="/" replace />;
   }
   return children;

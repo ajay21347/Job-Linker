@@ -4,6 +4,7 @@ import {
   deleteJob,
   getJobById,
   getJobs,
+  updateJob,
 } from "../controllers/jobController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -16,5 +17,7 @@ router.get("/", getJobs);
 router.get("/:id", getJobById);
 
 router.delete("/delete/:id", protect, deleteJob);
+
+router.put("/update/:id", protect, updateJob);
 
 export default router;

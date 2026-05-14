@@ -57,3 +57,19 @@ export const getApplicants = async (req, res) => {
     });
   }
 };
+
+export const checkApplied = async (req, res) => {
+  try {
+    const application = await ApplicationModel.findOne({
+      job: req.params.jobId,
+      applicant: req.user.id,
+    });
+
+    res.status(200).json({
+      success: true,
+      applied: !!application,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -52,7 +52,7 @@ const Auth = () => {
           className="text-3xl font-semibold mb-10 text-purple-700
         "
         >
-          Job Portal
+          Job Linker
         </h1>
         <h2 className="text-4xl font-bold mb-2">
           {isLogin ? "Welcome back" : "Create account"}

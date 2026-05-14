@@ -89,36 +89,40 @@ const Profile = () => {
               onChange={handleChange}
               className=" bg-white/70 focus:bg-white w-full border rounded p-3 h-24 resize-none placeholder:text-gray-600 disabled:opacity-100 text-gray-400 focus:ring-2 focus:ring-purple-400"
             />
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-gray-500" />
-                <span className="font-medium">Resume</span>
-              </div>
-              {user.resume ? (
-                <div className="flex items-center justify-between bg-white/70 px-4 py-3 rounded-lg">
-                  <a
-                    href={user.resume}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-purple-600 hover:underline flex items-center"
-                  >
-                    <Eye className="w-4 h-4 mr-1" /> View Resume
-                  </a>
-                  <a href={user.resume} download>
-                    <Button
-                      variant="secondary"
-                      className="hover:underline flex items-center"
-                    >
-                      <Download className="w-4 h-4 mr-1" />
-                      Download
-                    </Button>
-                  </a>
+            {user?.role === "seeker" && (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-gray-500" />
+                  <span className="font-medium">Resume</span>
                 </div>
-              ) : (
-                <p className="text-gray-500">No resume uploaded</p>
-              )}
-              {isEditing && <input type="file" onChange={handleResumeUpload} />}
-            </div>
+                {user.resume ? (
+                  <div className="flex items-center justify-between bg-white/70 px-4 py-3 rounded-lg">
+                    <a
+                      href={user.resume}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-purple-600 hover:underline flex items-center"
+                    >
+                      <Eye className="w-4 h-4 mr-1" /> View Resume
+                    </a>
+                    <a href={user.resume} download>
+                      <Button
+                        variant="secondary"
+                        className="hover:underline flex items-center"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No resume uploaded</p>
+                )}
+                {isEditing && (
+                  <input type="file" onChange={handleResumeUpload} />
+                )}
+              </div>
+            )}
           </div>
           <div className="flex justify-end gap-3">
             {isEditing ? (

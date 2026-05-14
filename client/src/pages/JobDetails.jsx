@@ -12,6 +12,7 @@ import {
   MapPin,
   User2,
 } from "lucide-react";
+import { getDeadlineText, getPostedTime } from "@/utils/jobUtils";
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -20,12 +21,18 @@ const JobDetails = () => {
   const [applied, setApplied] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
+  const isExpired = job ? new Date(job.deadline) < new Date() : false;
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const res = await api.get(`/jobs/${id}`);
         setJob(res.data.job);
+
+        if (user?.role === "seeker") {
+          const appliedRes = await api.get(`/application/check/${id}`);
+          setApplied(appliedRes.data.applied);
+        }
       } catch (error) {
         toast.error("Failed to load job");
       }
@@ -44,6 +51,9 @@ const JobDetails = () => {
       toast.error(error.response?.data?.message);
 
       if (error.response?.data?.message === "Already applied") setApplied(true);
+      if (isExpired) {
+        return toast.error("Application deadline expired");
+      }
     }
   };
 
@@ -79,39 +89,56 @@ const JobDetails = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <IndianRupee className="w-4 h-4 text-green-600" />
-                    {job.salary || "Not diclosed"}
+                    {job.salary
+                      ? `${job.salary.toLocaleString()} P.A.`
+                      : "Not disclosed"}
                   </div>
                 </div>
               </div>
             </div>
             {user?.role === "recruiter" ? (
-              <Button
-                onClick={() => navigate(`/applicants/${job._id}`)}
-                className="bg-indigo-600 hover:bg-indigo-700"
-              >
-                View Applicants
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => navigate(`/applicants/${job._id}`)}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  View Applicants
+                </Button>
+
+                <Button
+                  onClick={() => navigate(`/edit-job/${job._id}`)}
+                  className="bg-purple-600 hover:bg-purple-700 hover:underline underline-offset-4
+                  "
+                >
+                  Update Job
+                </Button>
+              </div>
             ) : (
               <Button
                 onClick={handleApply}
-                disabled={applied}
+                disabled={applied || isExpired}
                 className={`transition-all duration-200 ${
                   applied
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-purple-600 hover:bg-purple-700 hover:scale-105 "
                 }`}
               >
-                {applied ? "Applied" : " Apply Now"}
+                {isExpired ? "Expired" : applied ? "Applied" : " Apply Now"}
               </Button>
             )}
           </div>
           <div className="flex gap-3 flex-wrap">
             <div className="px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
-              {job.jobType}
+              {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}
             </div>
+
             <div className="px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium flex items-center gap-1">
               <Clock3 className="w-4 h-4" />
-              Posted Recently
+              {getPostedTime(job.createdAt)}
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Clock3 className="w-4 h-4 text-red-500" />
+              Deadline: {getDeadlineText(job.deadline)}
             </div>
           </div>
           {/* Description */}

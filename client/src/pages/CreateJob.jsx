@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import api from "@/utils/api";
-import { Briefcase } from "lucide-react";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Briefcase, Clock3 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Select,
@@ -16,6 +16,7 @@ import {
 
 const CreateJob = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -23,17 +24,49 @@ const CreateJob = () => {
     salary: "",
     description: "",
     jobType: "full-time",
+    deadline: "",
   });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    if (id) {
+      const fetchJob = async () => {
+        try {
+          const res = await api.get(`/jobs/${id}`);
+
+          setForm({
+            title: res.data.job.title,
+            company: res.data.job.company,
+            location: res.data.job.location,
+            salary: res.data.job.salary,
+            description: res.data.job.description,
+            jobType: res.data.job.jobType,
+            deadline: res.data.job.deadline?.split("T")[0],
+          });
+        } catch (error) {
+          toast.error("Failed to load job");
+        }
+      };
+      fetchJob();
+    }
+  }, [id]);
+
   const handleSubmit = async () => {
     try {
-      await api.post("/jobs/create", form);
-      toast.success("Job posted successfully ");
-      navigate("/recruiter-dashboard");
+      if (id) {
+        await api.put(`/jobs/update/${id}`, form);
+        toast.success("Job updated successfully");
+      } else {
+        await api.post("/jobs/create", form);
+        toast.success("Job posted successfully ");
+      }
+
+      setTimeout(() => {
+        navigate("/recruiter-dashboard");
+      }, 1000);
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     }
@@ -46,7 +79,7 @@ const CreateJob = () => {
           {/*Header*/}
           <div className=" flex items-center gap-2 text-xl font-bold">
             <Briefcase className="text-indigo-600" />
-            Post a Job
+            {id ? "Update Job" : "Post a Job"}
           </div>
 
           {/* Form */}
@@ -76,6 +109,18 @@ const CreateJob = () => {
               onChange={handleChange}
               className="bg-white/70 focus:ring-2 focus:ring-indigo-400"
             />
+
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-gray-600">
+                Application Deadline
+              </label>
+              <Input
+                name="deadline"
+                type="date"
+                onChange={handleChange}
+                className="bg-white/70 focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
             <Select
               onValueChange={(value) => setForm({ ...form, jobType: value })}
             >
