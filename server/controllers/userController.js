@@ -87,12 +87,6 @@ export const login = async (req, res) => {
       },
     );
 
-    // const refreshToken = jwt.sign(
-    //   { id: existingUser._id },
-    //   process.env.JWT_SECRET,
-    //   { expiresIn: "30d" },
-    // );
-
     existingUser.isLoggedIn = true;
     await existingUser.save();
 
@@ -118,7 +112,7 @@ export const login = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email, phone, bio, resume } = req.body;
+    const { name, email, phone, bio } = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
@@ -127,7 +121,6 @@ export const updateProfile = async (req, res) => {
         email,
         phone,
         bio,
-        resume,
       },
       { returnDocument: "after" },
     );
@@ -139,5 +132,43 @@ export const updateProfile = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const uploadResume = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    user.resume = { url: req.file.path, public_id: req.file.filename };
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      resume: user.resume,
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

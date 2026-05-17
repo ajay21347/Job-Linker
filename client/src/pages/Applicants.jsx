@@ -1,4 +1,3 @@
-import App from "@/App";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import api from "@/utils/api";
@@ -33,7 +32,7 @@ const Applicants = () => {
           {applications.map((app) => (
             <Card
               key={app._id}
-              className="shadow-lg hover::shadow-xl transition duration-300"
+              className="shadow-lg hover:shadow-xl transition duration-300"
             >
               <CardContent className="p-6 flex flex-col gap-4">
                 <div className="flex items-center gap-2">
@@ -54,13 +53,13 @@ const Applicants = () => {
                 <div className="flex gap-3 mt-3">
                   <Button
                     variant="secondary"
-                    onClick={() => window.open(app.applicant?.resume, "_blank")}
+                    onClick={() => window.open(app.resume?.url, "_blank")}
                   >
                     <FileText className="w-4 h4 mr-1" />
                     View Resume
                   </Button>
                 </div>
-                <Button onClick={() => window.open(app.applicant?.resume)}>
+                <Button onClick={() => window.open(app.resume?.url)}>
                   Download
                 </Button>
               </CardContent>

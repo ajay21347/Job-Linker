@@ -25,10 +25,22 @@ export const applyJob = async (req, res) => {
         message: "Already applied",
       });
     }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume is required",
+      });
+    }
+
     await ApplicationModel.create({
       job: jobId,
       applicant: req.user.id,
       recruiter: job.postedBy,
+      resume: {
+        url: req.file.path,
+        public_id: req.file.pathname,
+      },
     });
 
     res.status(201).json({

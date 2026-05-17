@@ -8,35 +8,75 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
-
   const [isEditing, setIsEditing] = useState(false);
+  const [resumeFile, setResumeFile] = useState(null);
+
   const [user, setUser] = useState({
     ...storedUser,
     phone: storedUser?.phone || "",
     preferences: storedUser?.preferences || "",
     bio: storedUser?.bio || "",
-    resume: storedUser?.resume || "",
+    resume: storedUser?.resume || {},
   });
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleResumeUpload = (e) => {
+  const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const fileURL = URL.createObjectURL(file);
-      setUser({ ...user, resume: fileURL });
+
+    if (!file) return;
+    setResumeFile(file);
+  };
+
+  const updateResume = async () => {
+    try {
+      if (!resumeFile) {
+        return toast.error("Select a resume first");
+      }
+
+      const formData = new FormData();
+
+      formData.append("resume", resumeFile);
+
+      const res = await api.put("/user/upload-resume", formData);
+
+      const updatedUser = {
+        ...user,
+        resume: res.data.resume,
+      };
+
+      setUser(updatedUser);
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      setResumeFile(null);
+
+      toast.success("Resume updated successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Resume update failed");
     }
   };
 
   const handleSave = async () => {
     try {
-      const res = await api.put("/user/profile", user);
+      const profileData = {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        bio: user.bio,
+      };
 
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const res = await api.put("/user/profile", profileData);
 
-      setUser(res.data.user);
+      const updatedUser = {
+        ...user,
+        ...res.data.user,
+      };
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
       toast.success("Profile updated successfully");
 
       setIsEditing(false);
@@ -107,20 +147,42 @@ const Profile = () => {
                   <FileText className="w-5 h-5 text-gray-500" />
                   <span className="font-medium">Resume</span>
                 </div>
-                {user.resume ? (
+                {user.resume?.url ? (
                   <div className="flex items-center justify-between bg-white/70 px-4 py-3 rounded-lg">
-                    <a
-                      href={user.resume}
+                    {/* <a
+                      href={
+                        user.resume?.url
+                          ? user.replace(
+                              "/upload/",
+                              "/upload/f1_attachment:false/",
+                            )
+                          : "#"
+                      }
                       target="_blank"
                       rel="noreferrer"
                       className="text-purple-600 hover:underline flex items-center"
                     >
                       <Eye className="w-4 h-4 mr-1" /> View Resume
-                    </a>
-                    <a href={user.resume} download>
+                    </a> */}
+
+                    <Button
+                      variant="outline"
+                      className="hover:text-purple-700 hover:underline border-none shadow-none"
+                      onClick={() =>
+                        window.open(
+                          `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(user.resume?.url)}`,
+                          "_blank",
+                        )
+                      }
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      View Resume
+                    </Button>
+
+                    <a href={user.resume?.url} download>
                       <Button
                         variant="secondary"
-                        className="hover:underline flex items-center"
+                        className="hover:text-purple-700 hover:underline border-none shadow-none"
                       >
                         <Download className="w-4 h-4 mr-1" />
                         Download
@@ -131,7 +193,21 @@ const Profile = () => {
                   <p className="text-gray-500">No resume uploaded</p>
                 )}
                 {isEditing && (
-                  <input type="file" onChange={handleResumeUpload} />
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleResumeUpload}
+                    />
+                    {resumeFile && (
+                      <Button
+                        onClick={updateResume}
+                        className="bg-indigo-600 hover:bg-indigo-700"
+                      >
+                        Update
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             )}

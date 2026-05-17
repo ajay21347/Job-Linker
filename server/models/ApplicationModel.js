@@ -12,6 +12,16 @@ const applicationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    resume: {
+      url: {
+        type: String,
+        required: true,
+      },
+      public_id: {
+        type: String,
+        required: true,
+      },
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],

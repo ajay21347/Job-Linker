@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
     bio: { type: String, default: "" },
-    resume: { type: String, default: "" },
+    resume: { url: String, public_id: String },
     profilePic: { type: String, default: "" },
     token: { type: String, default: null },
     isLoggedIn: { type: Boolean, default: false },

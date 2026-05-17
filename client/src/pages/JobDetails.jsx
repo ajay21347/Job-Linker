@@ -12,6 +12,13 @@ import {
   MapPin,
   User2,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { getDeadlineText, getPostedTime } from "@/utils/jobUtils";
 
 const JobDetails = () => {
@@ -19,6 +26,8 @@ const JobDetails = () => {
   const [job, setJob] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [file, setFile] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const isExpired = job ? new Date(job.deadline) < new Date() : false;
@@ -34,26 +43,50 @@ const JobDetails = () => {
           setApplied(appliedRes.data.applied);
         }
       } catch (error) {
-        toast.error("Failed to load job");
+        toast.error("Failed to load job" + error);
       }
     };
     fetchJobs();
   }, [id]);
 
-  const handleApply = async () => {
+  const handleApplyClick = () => {
+    if (!user?.resume?.url) {
+      toast.error("Resume required");
+      navigate("/profile");
+      return;
+    }
+    setOpen(true);
+  };
+
+  const applyWithExisting = async () => {
     try {
       const res = await api.post("/application/apply", {
         jobId: job._id,
+        resumeUrl: user.resume.url,
+        public_id: user.resume.public_id,
       });
+
       toast.success(res.data.message);
       setApplied(true);
+      setOpen(false);
     } catch (error) {
       toast.error(error.response?.data?.message);
+    }
+  };
 
-      if (error.response?.data?.message === "Already applied") setApplied(true);
-      if (isExpired) {
-        return toast.error("Application deadline expired");
-      }
+  const applyWithNewResume = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("jobId", job._id);
+      formData.append("resume", file);
+
+      const res = await api.post("/application/apply", formData);
+
+      toast.success(res.data.message);
+      setApplied(true);
+      setOpen(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message);
     }
   };
 
@@ -115,7 +148,7 @@ const JobDetails = () => {
               </div>
             ) : (
               <Button
-                onClick={handleApply}
+                onClick={handleApplyClick}
                 disabled={applied || isExpired}
                 className={`transition-all duration-200 ${
                   applied
@@ -175,6 +208,33 @@ const JobDetails = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Resume Found</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Button variant="outline" onClick={() => window.open.resume.url}>
+              View Current Resume
+            </Button>
+            <Button onClick={applyWithExisting}>Use This Resume</Button>
+            <div className="border-t p-4 ">
+              <p className="text-sm mb-2">Upload New Resume</p>
+              <Input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+              {file && (
+                <Button className="mt-4 w-full" onClick={applyWithNewResume}>
+                  Upload & Apply
+                </Button>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

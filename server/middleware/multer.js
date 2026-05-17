@@ -1,0 +1,27 @@
+import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../config/cloudinary.js";
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+
+  params: async (req, file) => ({
+    folder: "resumes",
+
+    resource_type: "raw",
+
+    use_filename: true,
+
+    unique_filename: false,
+  }),
+});
+
+const upload = multer({
+  storage,
+
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
+export default upload;
