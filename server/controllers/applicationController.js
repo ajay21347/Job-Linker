@@ -26,7 +26,20 @@ export const applyJob = async (req, res) => {
       });
     }
 
-    if (!req.file) {
+    let resumeData;
+    if (req.file) {
+      resumeData = {
+        url: req.file.path,
+        public_id: req.file.filename,
+      };
+    } else {
+      resumeData = {
+        url: req.body.resumeUrl,
+        public_id: req.body.public_id,
+      };
+    }
+
+    if (!resumeData.url) {
       return res.status(400).json({
         success: false,
         message: "Resume is required",
@@ -37,10 +50,7 @@ export const applyJob = async (req, res) => {
       job: jobId,
       applicant: req.user.id,
       recruiter: job.postedBy,
-      resume: {
-        url: req.file.path,
-        public_id: req.file.pathname,
-      },
+      resume: resumeData,
     });
 
     res.status(201).json({
@@ -81,6 +91,67 @@ export const checkApplied = async (req, res) => {
       success: true,
       applied: !!application,
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getMyApplications = async (req, res) => {
+  try {
+    const applications = await ApplicationModel.find({
+      applicant: req.user.id,
+    })
+      .populate("job")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      applications,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const recruiterNotifications = async (req, res) => {
+  try {
+    const jobs = await Job.find({
+      postedBy: req.user.id,
+    });
+    const jobIds = jobs.map((job) => job._id);
+
+    const count = await ApplicationModel.countDocuments({
+      job: { $in: jobIds },
+      isSeen: false,
+    });
+    res.status(200).json({ success: true, count });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const markRecruiterNotificationSeen = async (req, res) => {
+  try {
+    const jobs = await Job.find({ postedBy: req.user.id });
+
+    const jobsIds = jobs.map((job) => job._id);
+
+    await ApplicationModel.updateMany(
+      {
+        job: { $in: jobIds },
+        isSeen: false,
+      },
+      {
+        $set: { isSeen: true },
+      },
+    );
+    res.status(200).json({ success: true, message: "Notification cleared" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

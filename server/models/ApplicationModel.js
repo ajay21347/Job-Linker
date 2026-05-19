@@ -27,6 +27,14 @@ const applicationSchema = new mongoose.Schema(
       enum: ["pending", "accepted", "rejected"],
       default: "pending",
     },
+    isUpdated: {
+      type: Boolean,
+      default: false,
+    },
+    isSeen: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

@@ -210,15 +210,28 @@ const JobDetails = () => {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white text-black backdrop-blur-md border border-gray-200">
           <DialogHeader>
-            <DialogTitle>Resume Found</DialogTitle>
+            <DialogTitle>Choose your resume option below</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
-            <Button variant="outline" onClick={() => window.open.resume.url}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                window.open(
+                  `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(user.resume?.url)}`,
+                  "_blank",
+                )
+              }
+            >
               View Current Resume
             </Button>
-            <Button onClick={applyWithExisting}>Use This Resume</Button>
+            <Button
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              onClick={applyWithExisting}
+            >
+              Use This Resume
+            </Button>
             <div className="border-t p-4 ">
               <p className="text-sm mb-2">Upload New Resume</p>
               <Input
@@ -227,7 +240,10 @@ const JobDetails = () => {
                 onChange={(e) => setFile(e.target.files[0])}
               />
               {file && (
-                <Button className="mt-4 w-full" onClick={applyWithNewResume}>
+                <Button
+                  className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                  onClick={applyWithNewResume}
+                >
                   Upload & Apply
                 </Button>
               )}

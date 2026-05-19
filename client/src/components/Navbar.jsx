@@ -1,10 +1,14 @@
-import { Home, LogOut, User2 } from "lucide-react";
+import api from "@/utils/api";
+import { Home, LogOut, User2, FileText, Bell } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [applicationCount, setApplicationCount] = useState(0);
+  const [newApplicants, setNewApplicants] = useState(0);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -19,6 +23,31 @@ const Navbar = () => {
   };
 
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        // Seeker Notifications
+        if (user?.role === "seeker") {
+          const res = await api.get("/application/my-applications");
+          const updated = res.data.applications.filter(
+            (app) => app.isUpdated === true,
+          );
+          setApplicationCount(updated.length);
+        }
+
+        // Recruiter Notifications
+        if (user?.role === "recruiter") {
+          const res = await api.get("/application/recruiter-notifications");
+
+          setNewApplicants(res.data.count);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchNotifications();
+  }, []);
 
   return (
     <div className="flex justify-between items-center px-6 py-4 bg-purple-600 text-white shadow-md">
@@ -40,7 +69,7 @@ const Navbar = () => {
               navigate("/seeker-dashboard");
             }
           }}
-          className={`flex items-center gap-1 cursor-pointer hover:text-gray-200 ${isActive("/seeker-dashboard") ? "font-bold underline" : ""}`}
+          className={`flex items-center gap-1 cursor-pointer hover:text-gray-200 ${isActive("/seeker-dashboard") ? "font-bold hover:underline" : ""}`}
         >
           <Home className="w-5 h-5" />
           <span>Home</span>
@@ -48,14 +77,59 @@ const Navbar = () => {
 
         <div
           onClick={() => navigate("/profile")}
-          className={`flex items-center gap-1 cursor-pointer hover:text-gray-200 ${isActive("/seeker-dashboard") ? "font-bold underline" : ""}`}
+          className={`flex items-center gap-1 cursor-pointer hover:text-gray-200 ${isActive("/seeker-dashboard") ? "font-bold hover:underline" : ""}`}
         >
           <User2 className="w-5 h-5" />
           <span>Profile</span>
         </div>
-        <span className="hidden md:block text-sm bg-purple-500 px-3 py-1 rounded">
-          {user?.name}
-        </span>
+
+        {/* Seeker Applications */}
+        {user?.role === "seeker" && (
+          <div
+            onClick={() => navigate("/my-applications")}
+            className={`relative flex items-center gap-1 cursor-pointer hover:text-gray-200 ${
+              isActive("/my-applications") ? "font-bold underline" : ""
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+
+            <span className="font-bold hover:underline">Applications</span>
+
+            {applicationCount > 0 && (
+              <span className="absolute -top-3 -right-4 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full animate-bounce shadow-lg">
+                {applicationCount}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Recruiter Notifications */}
+        {user?.role === "recruiter" && (
+          <div
+            onClick={async () => {
+              try {
+                await api.put("/application/mark-recruiter-seen");
+
+                setNewApplicants(0);
+
+                navigate("/recruiter-dashboard");
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+            className={`relative flex items-center gap-2 cursor-pointer hover:text-gray-200 transition-all ${isActive("/recruiter-dashboard") ? "font-bold hover:underline" : ""}`}
+          >
+            <Bell className="w-5 h-5" />
+
+            <span>Applicants</span>
+
+            {newApplicants > 0 && (
+              <span className="absolute -top-3 -right-4 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full animate-bounce shadow-lg">
+                {newApplicants}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <button

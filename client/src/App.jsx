@@ -9,6 +9,7 @@ import JobDetails from "./pages/JobDetails";
 import Profile from "./pages/Profile";
 import CreateJob from "./pages/CreateJob";
 import Applicants from "./pages/Applicants";
+import MyApplications from "./pages/MyApplications";
 
 const router = createBrowserRouter([
   {
@@ -97,6 +98,17 @@ const router = createBrowserRouter([
         <Navbar />
         <Applicants />
       </>
+    ),
+  },
+  {
+    path: "/my-applications",
+    element: (
+      <ProtectedRoute allowedRole="seeker">
+        <>
+          <Navbar />
+          <MyApplications />
+        </>
+      </ProtectedRoute>
     ),
   },
 ]);
