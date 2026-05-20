@@ -104,9 +104,24 @@ export const getMyApplications = async (req, res) => {
       .populate("job")
       .sort({ createdAt: -1 });
 
+    const updatedCount = applications.filter(
+      (app) => app.isUpdated === true,
+    ).length;
+
+    await ApplicationModel.updateMany(
+      {
+        applicant: req.user.id,
+        isUpdated: true,
+      },
+      {
+        $set: { isUpdated: false },
+      },
+    );
+
     res.status(200).json({
       success: true,
       applications,
+      updatedCount,
     });
   } catch (error) {
     res.status(500).json({
@@ -140,7 +155,7 @@ export const markRecruiterNotificationSeen = async (req, res) => {
   try {
     const jobs = await Job.find({ postedBy: req.user.id });
 
-    const jobsIds = jobs.map((job) => job._id);
+    const jobIds = jobs.map((job) => job._id);
 
     await ApplicationModel.updateMany(
       {
@@ -154,5 +169,51 @@ export const markRecruiterNotificationSeen = async (req, res) => {
     res.status(200).json({ success: true, message: "Notification cleared" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getRecruiterNotifications = async (req, res) => {
+  try {
+    const jobs = await Job.find({
+      postedBy: req.user.id,
+    });
+
+    const jobIds = jobs.map((job) => job._id);
+    const notifications = await ApplicationModel.find({ job: { $in: jobIds } })
+      .populate("job")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateApplicationStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const application = await ApplicationModel.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    application.status = status;
+    application.isUpdated = true;
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Application ${status}`,
+      application,
+    });
+  } catch (error) {
+    console.log(error);
   }
 };

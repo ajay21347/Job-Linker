@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import CreateJob from "./pages/CreateJob";
 import Applicants from "./pages/Applicants";
 import MyApplications from "./pages/MyApplications";
+import RecruiterNotifications from "./pages/RecruiterNotifications";
 
 const router = createBrowserRouter([
   {
@@ -107,6 +108,17 @@ const router = createBrowserRouter([
         <>
           <Navbar />
           <MyApplications />
+        </>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/recruiter-notifications",
+    element: (
+      <ProtectedRoute allowedRole="recruiter">
+        <>
+          <Navbar />
+          <RecruiterNotifications />
         </>
       </ProtectedRoute>
     ),

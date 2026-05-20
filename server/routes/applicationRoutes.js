@@ -4,8 +4,10 @@ import {
   checkApplied,
   getApplicants,
   getMyApplications,
+  getRecruiterNotifications,
   markRecruiterNotificationSeen,
   recruiterNotifications,
+  updateApplicationStatus,
 } from "../controllers/applicationController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/multer.js";
@@ -18,5 +20,8 @@ router.get("/check/:jobId", protect, checkApplied);
 router.get("/my-applications", protect, getMyApplications);
 router.get("/recruiter-notifications", protect, recruiterNotifications);
 router.put("/mark-recruiter-seen", protect, markRecruiterNotificationSeen);
+router.get("/recruiter-all-notifications", protect, getRecruiterNotifications);
+
+router.put("/update-status/:id", protect, updateApplicationStatus);
 
 export default router;

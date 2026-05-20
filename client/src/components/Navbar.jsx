@@ -30,10 +30,8 @@ const Navbar = () => {
         // Seeker Notifications
         if (user?.role === "seeker") {
           const res = await api.get("/application/my-applications");
-          const updated = res.data.applications.filter(
-            (app) => app.isUpdated === true,
-          );
-          setApplicationCount(updated.length);
+
+          setApplicationCount(res.data.updatedCount || 0);
         }
 
         // Recruiter Notifications
@@ -47,7 +45,7 @@ const Navbar = () => {
       }
     };
     fetchNotifications();
-  }, []);
+  }, [location.pathname]);
 
   return (
     <div className="flex justify-between items-center px-6 py-4 bg-purple-600 text-white shadow-md">
@@ -112,7 +110,7 @@ const Navbar = () => {
 
                 setNewApplicants(0);
 
-                navigate("/recruiter-dashboard");
+                navigate("/recruiter-notifications");
               } catch (error) {
                 console.log(error);
               }

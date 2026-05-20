@@ -19,7 +19,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getDeadlineText, getPostedTime } from "@/utils/jobUtils";
+import {
+  getDeadlineText,
+  getPostedDate,
+  getPostedTime,
+} from "@/utils/jobUtils";
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -167,7 +171,9 @@ const JobDetails = () => {
 
             <div className="px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium flex items-center gap-1">
               <Clock3 className="w-4 h-4" />
-              {getPostedTime(job.createdAt)}
+              <div className="flex flex-col">
+                <span>{getPostedTime(job.createdAt)}</span>
+              </div>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <Clock3 className="w-4 h-4 text-red-500" />
@@ -203,6 +209,18 @@ const JobDetails = () => {
               <User2 className="w-4 h-4 text-indigo-600" />
               <span>
                 {job.postedBy?.name} ({job.postedBy?.email})
+              </span>
+            </div>
+          </div>
+
+          {/* Posted Information */}
+          <div className="bg-green-50 rounded-2xl p-5 border border-green-100">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">
+              Posted Information
+            </h2>
+            <div className="flex items-center gap-2 text-gray-700">
+              <span className="text-sm text-gray-500">
+                Posted on : {getPostedDate(job.createdAt)}
               </span>
             </div>
           </div>
