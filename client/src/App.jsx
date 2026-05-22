@@ -11,6 +11,7 @@ import CreateJob from "./pages/CreateJob";
 import Applicants from "./pages/Applicants";
 import MyApplications from "./pages/MyApplications";
 import RecruiterNotifications from "./pages/RecruiterNotifications";
+import ResumeAnalysis from "./pages/ResumeAnalysis";
 
 const router = createBrowserRouter([
   {
@@ -119,6 +120,17 @@ const router = createBrowserRouter([
         <>
           <Navbar />
           <RecruiterNotifications />
+        </>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/resume-analysis",
+    element: (
+      <ProtectedRoute allowedRole="seeker">
+        <>
+          <Navbar />
+          <ResumeAnalysis />
         </>
       </ProtectedRoute>
     ),

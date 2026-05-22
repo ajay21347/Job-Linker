@@ -70,7 +70,7 @@ const Navbar = () => {
           className={`flex items-center gap-1 cursor-pointer hover:text-gray-200 ${isActive("/seeker-dashboard") ? "font-bold hover:underline" : ""}`}
         >
           <Home className="w-5 h-5" />
-          <span>Home</span>
+          <span className="font-bold hover:underline">Home</span>
         </div>
 
         <div
@@ -78,7 +78,7 @@ const Navbar = () => {
           className={`flex items-center gap-1 cursor-pointer hover:text-gray-200 ${isActive("/seeker-dashboard") ? "font-bold hover:underline" : ""}`}
         >
           <User2 className="w-5 h-5" />
-          <span>Profile</span>
+          <span className="font-bold hover:underline">Profile</span>
         </div>
 
         {/* Seeker Applications */}
