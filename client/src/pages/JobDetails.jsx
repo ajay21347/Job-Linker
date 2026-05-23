@@ -10,6 +10,7 @@ import {
   Clock3,
   IndianRupee,
   MapPin,
+  Sparkles,
   User2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,20 @@ const JobDetails = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const isExpired = job ? new Date(job.deadline) < new Date() : false;
+  const [loadingStates, setLoadingStates] = useState({
+    apply: false,
+    analyze: false,
+    upload: false,
+    applicants: false,
+    update: false,
+  });
+
+  const setLoading = (key, value) => {
+    setLoadingStates((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -47,7 +62,7 @@ const JobDetails = () => {
           setApplied(appliedRes.data.applied);
         }
       } catch (error) {
-        toast.error("Failed to load job" + error);
+        toast.error(error.response?.data?.message || "Failed to load job");
       }
     };
     fetchJobs();
@@ -64,6 +79,7 @@ const JobDetails = () => {
 
   const applyWithExisting = async () => {
     try {
+      setLoading("apply", true);
       const res = await api.post("/application/apply", {
         jobId: job._id,
         resumeUrl: user.resume.url,
@@ -75,11 +91,14 @@ const JobDetails = () => {
       setOpen(false);
     } catch (error) {
       toast.error(error.response?.data?.message);
+    } finally {
+      setLoading("apply", false);
     }
   };
 
   const applyWithNewResume = async () => {
     try {
+      setLoading("upload", true);
       const formData = new FormData();
       formData.append("jobId", job._id);
       formData.append("resume", file);
@@ -91,6 +110,27 @@ const JobDetails = () => {
       setOpen(false);
     } catch (error) {
       toast.error(error.response?.data?.message);
+    } finally {
+      setLoading("upload", false);
+    }
+  };
+  const handleJobMatch = async () => {
+    try {
+      setLoading("analyze", true);
+      const res = await api.post("/ai/analyze-job-match", { jobId: job._id });
+
+      navigate("/resume-analysis", {
+        state: { analysis: res.data.analysis },
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Something went wrong",
+      );
+    } finally {
+      setLoading("analyze", false);
     }
   };
 
@@ -151,17 +191,47 @@ const JobDetails = () => {
                 </Button>
               </div>
             ) : (
-              <Button
-                onClick={handleApplyClick}
-                disabled={applied || isExpired}
-                className={`transition-all duration-200 ${
-                  applied
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-purple-600 hover:bg-purple-700 hover:scale-105 "
-                }`}
-              >
-                {isExpired ? "Expired" : applied ? "Applied" : " Apply Now"}
-              </Button>
+              <div className="flex gap-4 mt-6 ">
+                <Button
+                  onClick={handleApplyClick}
+                  disabled={applied || isExpired || loadingStates.apply}
+                  className={`transition-all duration-200 ${
+                    applied
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-purple-600 hover:bg-purple-700 text-white hover:scale-105 "
+                  }`}
+                >
+                  {loadingStates.apply ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Applying...
+                    </div>
+                  ) : isExpired ? (
+                    "Expired"
+                  ) : applied ? (
+                    "Applied"
+                  ) : (
+                    " Apply Now"
+                  )}
+                </Button>
+                <Button
+                  onClick={handleJobMatch}
+                  disabled={loadingStates.analyze}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  {loadingStates.analyze ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Analyzing...
+                    </div>
+                  ) : (
+                    <>
+                      <Sparkles size={18} />
+                      Analyze Job Match
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
           <div className="flex gap-3 flex-wrap">
@@ -259,10 +329,18 @@ const JobDetails = () => {
               />
               {file && (
                 <Button
+                  disabled={loadingStates.upload}
                   className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white"
                   onClick={applyWithNewResume}
                 >
-                  Upload & Apply
+                  {loadingStates.upload ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Uploading...
+                    </div>
+                  ) : (
+                    "Upload & Apply"
+                  )}
                 </Button>
               )}
             </div>

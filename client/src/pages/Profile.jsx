@@ -244,6 +244,13 @@ const Profile = () => {
                       {loadingAI ? "Analyzing..." : "AI Analyze"}
                     </Button>
 
+                    <Button
+                      onClick={() => navigate("/analysis-history")}
+                      className="bg-yellow-500 hover:bg-yellow-400 rounded-xl hover:scale-105 border-none shadow-sm"
+                    >
+                      Analysis History
+                    </Button>
+
                     <a href={user.resume?.url} download>
                       <Button
                         variant="secondary"
