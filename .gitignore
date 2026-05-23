@@ -12,5 +12,6 @@ dist/
 build/
 
 # system files
+.vscode/
 .DS_Store
 Thumbs.db
