@@ -13,8 +13,9 @@ import MyApplications from "./pages/MyApplications";
 import RecruiterNotifications from "./pages/RecruiterNotifications";
 import ResumeAnalysis from "./pages/ResumeAnalysis";
 import AnalysisHistory from "./pages/AnalysisHistory";
+import AppLayout from "./layouts/AppLayout";
 
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
   {
     path: "/",
     element: <Auth />,
@@ -150,6 +151,10 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <AppLayout />;
+    </>
+  );
 }
 export default App;

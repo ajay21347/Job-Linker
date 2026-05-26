@@ -5,40 +5,55 @@ import groq from "../utils/groq.js";
 import axios from "axios";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
+//Extract Resume Text
+const extractResumeText = async (req, user) => {
+  let pdfBuffer;
+
+  // Temporary uploaded resume
+  if (req.file?.buffer) {
+    pdfBuffer = req.file.buffer;
+
+    // Profile resume
+  } else if (user?.resume?.url) {
+    const pdfResponse = await axios.get(user.resume.url, {
+      responseType: "arraybuffer",
+    });
+
+    pdfBuffer = pdfResponse.data;
+  }
+
+  //  No Resume Found
+  else {
+    throw new Error("Please upload resume first or use your profile resume");
+  }
+
+  const uint8Array = new Uint8Array(pdfBuffer);
+
+  const pdf = await pdfjsLib.getDocument(uint8Array).promise;
+
+  let resumeText = "";
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+
+    const textContent = await page.getTextContent();
+
+    const pageText = textContent.items.map((item) => item.str).join(" ");
+
+    resumeText += pageText + " ";
+  }
+
+  return resumeText.replace(/\s+/g, " ").trim().slice(0, 12000);
+};
+
+// Analyze Resume
 export const analyzeResumeOpenAI = async (req, res) => {
   try {
     const userId = req.user.id;
 
     const user = await User.findById(userId);
 
-    if (!user?.resume?.url) {
-      return res.status(400).json({
-        success: false,
-        message: "Please upload resume first",
-      });
-    }
-
-    const pdfResponse = await axios.get(user.resume.url, {
-      responseType: "arraybuffer",
-    });
-
-    const uint8Array = new Uint8Array(pdfResponse.data);
-
-    const pdf = await pdfjsLib.getDocument(uint8Array).promise;
-
-    let resumeText = "";
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-
-      const textContent = await page.getTextContent();
-
-      const pageText = textContent.items.map((item) => item.str).join(" ");
-
-      resumeText += pageText + " ";
-    }
-
-    resumeText = resumeText.replace(/\s+/g, " ").trim().slice(0, 12000);
+    const resumeText = await extractResumeText(req, user);
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
@@ -121,6 +136,7 @@ export const analyzeResumeOpenAI = async (req, res) => {
   }
 };
 
+//Job Match
 export const analyzeJobMatch = async (req, res) => {
   try {
     const { jobId } = req.body;
@@ -129,12 +145,6 @@ export const analyzeJobMatch = async (req, res) => {
 
     const user = await User.findById(userId);
 
-    if (!user?.resume?.url) {
-      return res.status(400).json({
-        success: false,
-        message: "Please upload resume first",
-      });
-    }
     const job = await Job.findById(jobId);
 
     if (!job) {
@@ -144,25 +154,7 @@ export const analyzeJobMatch = async (req, res) => {
       });
     }
 
-    const pdfResponse = await axios.get(user.resume.url, {
-      responseType: "arraybuffer",
-    });
-
-    const uint8Array = new Uint8Array(pdfResponse.data);
-
-    const pdf = await pdfjsLib.getDocument(uint8Array).promise;
-
-    let resumeText = "";
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-
-      const textContent = await page.getTextContent();
-
-      const pageText = textContent.items.map((item) => item.str).join("");
-
-      resumeText += pageText + " ";
-    }
+    const resumeText = await extractResumeText(req, user);
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
@@ -245,6 +237,7 @@ Rules:
   }
 };
 
+// Analysis History
 export const getAnalysisHistory = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -260,6 +253,186 @@ export const getAnalysisHistory = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch history",
+    });
+  }
+};
+
+// AI Chat
+export const aiChat = async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message && !req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Message is required" });
+    }
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        {
+          role: "system",
+          content: `
+        You are an AI Career Assistant.
+
+      Help users with:
+      - resumes
+      - ATS optimization
+      - interview preparation
+      - career guidance
+      - learning roadmap
+      - jobs
+      - skills
+
+      Keep answers concise and professional.
+      `,
+        },
+        { role: "user", content: message },
+      ],
+    });
+
+    const reply = completion.choices[0].message.content;
+
+    return res.status(200).json({ success: true, reply });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "AI chat failed" });
+  }
+};
+
+// Generate Interview Questions
+export const generateInterviewQuestions = async (req, res) => {
+  try {
+    const { jobId } = req.body;
+
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found",
+      });
+    }
+
+    const resumeText = await extractResumeText(req, user);
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+
+      messages: [
+        {
+          role: "system",
+
+          content: `
+Generate interview questions.
+
+STRICT FORMAT:
+
+Technical Questions:
+- Question 1
+- Question 2
+
+Project Questions:
+- Question 1
+- Question 2
+
+HR Questions:
+- Question 1
+- Question 2
+
+Coding Questions:
+- Question 1
+- Question 2
+`,
+        },
+
+        {
+          role: "user",
+
+          content: `
+JOB DESCRIPTION:
+${job.description}
+
+SKILLS:
+${job.skills?.join(", ")}
+
+RESUME:
+${resumeText}
+`,
+        },
+      ],
+    });
+
+    const questions = completion.choices[0].message.content;
+
+    return res.status(200).json({
+      success: true,
+      questions,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate interview questions",
+    });
+  }
+};
+
+// Career Suggestions
+export const careerSuggestions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+
+    const resumeText = await extractResumeText(req, user);
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+
+      messages: [
+        {
+          role: "system",
+
+          content: `
+Provide:
+- career suggestions
+- missing skills
+- improvement roadmap
+- recommended technologies
+- learning path
+
+Use bullet points only.
+`,
+        },
+
+        {
+          role: "user",
+
+          content: `
+RESUME:
+${resumeText}
+`,
+        },
+      ],
+    });
+
+    const suggestions = completion.choices[0].message.content;
+
+    return res.status(200).json({
+      success: true,
+      suggestions,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Career suggestions failed",
     });
   }
 };

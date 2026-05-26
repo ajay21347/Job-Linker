@@ -18,10 +18,12 @@ import {
   AlertDialogTrigger,
   AlertDialogOverlay,
 } from "@/components/ui/alert-dialog";
+import { useAiAssistant } from "@/context/AiAssistantContext";
 const RecruiterDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const navigate = useNavigate();
 
+  const { open } = useAiAssistant();
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
@@ -53,13 +55,15 @@ const RecruiterDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-6">
+    <div
+      className={`min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-8 transition-all duration-300 ${open ? "mr-[-120px]" : "mr-0"}`}
+    >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Job Posts</h1>
 
         <Button
           onClick={() => navigate("/create-job")}
-          className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+          className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2 mt-5"
         >
           <Plus className="w-4 h-4 mr-1" />
           Post Job
@@ -75,7 +79,7 @@ const RecruiterDashboard = () => {
           No jobs posted yet.
         </div>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-4 gap-2">
           {jobs.map((job) => (
             <Card
               key={job._id}
@@ -95,7 +99,9 @@ const RecruiterDashboard = () => {
                 <div className="flex justify-between mt-3">
                   <span className="text-sm text-green-600">
                     ₹
-                    {job.salary ? `${job.salary.toLocaleString("en-IN")} P.A.` : "N/A"}
+                    {job.salary
+                      ? `${job.salary.toLocaleString("en-IN")} P.A.`
+                      : "N/A"}
                   </span>
                   <span className="text-sm text-purple-600">
                     {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}

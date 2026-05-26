@@ -25,6 +25,7 @@ import {
   getPostedDate,
   getPostedTime,
 } from "@/utils/jobUtils";
+import { useAiAssistant } from "@/context/AiAssistantContext";
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -43,6 +44,7 @@ const JobDetails = () => {
     applicants: false,
     update: false,
   });
+  const { setCurrentJob } = useAiAssistant();
 
   const setLoading = (key, value) => {
     setLoadingStates((prev) => ({
@@ -56,6 +58,7 @@ const JobDetails = () => {
       try {
         const res = await api.get(`/jobs/${id}`);
         setJob(res.data.job);
+        setCurrentJob(res.data.job);
 
         if (user?.role === "seeker") {
           const appliedRes = await api.get(`/application/check/${id}`);

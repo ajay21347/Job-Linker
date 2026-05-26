@@ -241,7 +241,7 @@ const Profile = () => {
                       className="bg-green-500 hover:bg-green-400 rounded-xl hover:scale-105 border-none shadow-sm"
                     >
                       <FileText className="w-4 h-4 mr-1" />
-                      {loadingAI ? "Analyzing..." : "AI Analyze"}
+                      {loadingAI ? "Analyzing..." : "Quick ATS Analysis"}
                     </Button>
 
                     <Button

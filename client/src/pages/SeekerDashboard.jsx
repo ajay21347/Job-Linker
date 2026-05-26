@@ -5,12 +5,14 @@ import { Briefcase, IndianRupee, MapPin, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDeadlineText, getPostedTime } from "@/utils/jobUtils";
+import { useAiAssistant } from "@/context/AiAssistantContext";
 
 const SeekerDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [search, setSearch] = useState("");
   const [appliedJobs, setAppliedJobs] = useState([]);
   const navigate = useNavigate();
+  const { open } = useAiAssistant();
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -44,7 +46,9 @@ const SeekerDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-8">
+    <div
+      className={`min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-8 transition-all duration-300 ${open ? "mr-[-120px]" : "mr-0"}`}
+    >
       {/* Search */}
       <div className="flex justify-center mb-8">
         <div className="relative w-full max-w-md">
