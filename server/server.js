@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import interviewRoutes from "./routes/interviewRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/jobs", jobRoutes);
 app.use("/api/v1/application", applicationRoutes);
 app.use("/api/v1/ai", aiRoutes);
+app.use("/api/v1/interview", interviewRoutes);
 
 const startServer = async () => {
   try {

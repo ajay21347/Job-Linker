@@ -12,8 +12,11 @@ import Applicants from "./pages/Applicants";
 import MyApplications from "./pages/MyApplications";
 import RecruiterNotifications from "./pages/RecruiterNotifications";
 import ResumeAnalysis from "./pages/ResumeAnalysis";
-import AnalysisHistory from "./pages/AnalysisHistory";
 import AppLayout from "./layouts/AppLayout";
+import MockInterview from "./pages/MockInterview";
+import InterviewDetails from "./pages/history/InterviewDetails";
+import HistoryCenter from "./pages/history/HistoryCenter";
+import AnalysisDetails from "./pages/history/AnalysisDetails";
 
 export const router = createBrowserRouter([
   {
@@ -138,12 +141,45 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/analysis-history",
+    path: "/history",
     element: (
       <ProtectedRoute allowedRole="seeker">
         <>
           <Navbar />
-          <AnalysisHistory />
+          <HistoryCenter />
+        </>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/mock-interview/:jobId",
+    element: (
+      <ProtectedRoute allowedRole="seeker">
+        <>
+          <MockInterview />
+        </>
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/history/interview/:id",
+    element: (
+      <ProtectedRoute allowedRole="seeker">
+        <>
+          <Navbar />
+          <InterviewDetails />
+        </>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/history/analysis/:id",
+    element: (
+      <ProtectedRoute allowedRole="seeker">
+        <>
+          <Navbar />
+          <AnalysisDetails />
         </>
       </ProtectedRoute>
     ),
@@ -151,10 +187,6 @@ export const router = createBrowserRouter([
 ]);
 
 function App() {
-  return (
-    <>
-      <AppLayout />;
-    </>
-  );
+  return <AppLayout />;
 }
 export default App;

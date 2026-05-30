@@ -1,5 +1,5 @@
 import { RouterProvider } from "react-router-dom";
-import {router} from "@/App"
+import { router } from "@/App";
 import AiAssistantSidebar from "@/pages/ai/AiAssistantSidebar";
 import { useAiAssistant } from "@/context/AiAssistantContext";
 

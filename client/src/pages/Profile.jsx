@@ -6,6 +6,7 @@ import {
   Download,
   Eye,
   FileText,
+  History,
   Mail,
   Pencil,
   Phone,
@@ -245,10 +246,10 @@ const Profile = () => {
                     </Button>
 
                     <Button
-                      onClick={() => navigate("/analysis-history")}
+                      onClick={() => navigate("/history")}
                       className="bg-yellow-500 hover:bg-yellow-400 rounded-xl hover:scale-105 border-none shadow-sm"
                     >
-                      Analysis History
+                      History Center
                     </Button>
 
                     <a href={user.resume?.url} download>

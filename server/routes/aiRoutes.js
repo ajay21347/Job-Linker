@@ -6,6 +6,7 @@ import {
   analyzeResumeOpenAI,
   careerSuggestions,
   generateInterviewQuestions,
+  getAnalysisById,
   getAnalysisHistory,
 } from "../controllers/aiController.js";
 
@@ -24,5 +25,7 @@ router.post("/analyze-job-match", protect, analyzeJobMatch);
 router.post("/interview-questions", protect, generateInterviewQuestions);
 
 router.post("/career-suggestions", protect, careerSuggestions);
+
+router.get("/history/:id", protect, getAnalysisById);
 
 export default router;

@@ -5,25 +5,19 @@ import groq from "../utils/groq.js";
 import axios from "axios";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
-//Extract Resume Text
+//Extract Resume
 const extractResumeText = async (req, user) => {
   let pdfBuffer;
 
-  // Temporary uploaded resume
   if (req.file?.buffer) {
     pdfBuffer = req.file.buffer;
-
-    // Profile resume
   } else if (user?.resume?.url) {
     const pdfResponse = await axios.get(user.resume.url, {
       responseType: "arraybuffer",
     });
 
     pdfBuffer = pdfResponse.data;
-  }
-
-  //  No Resume Found
-  else {
+  } else {
     throw new Error("Please upload resume first or use your profile resume");
   }
 
@@ -433,6 +427,22 @@ ${resumeText}
     return res.status(500).json({
       success: false,
       message: "Career suggestions failed",
+    });
+  }
+};
+
+//Ai Analysis History
+export const getAnalysisById = async (req, res) => {
+  try {
+    const analysis = await Analysis.findById(req.params.id);
+
+    res.json(analysis);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch analysis",
     });
   }
 };
