@@ -7,6 +7,7 @@ import {
   Briefcase,
   Sparkles,
   Target,
+  ArrowLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -24,14 +25,67 @@ const SectionCard = ({
 }) => {
   if (!hasContent(content)) return null;
 
+  const colorClasses = {
+    green: {
+      title: "text-green-700",
+      icon: "text-green-600",
+      bg: "bg-green-100",
+      border: "border-green-300",
+      card: "bg-green-50 border-green-200",
+    },
+    red: {
+      title: "text-red-700",
+      icon: "text-red-600",
+      bg: "bg-red-100",
+      border: "border-red-300",
+      card: "bg-red-50 border-red-200",
+    },
+    yellow: {
+      title: "text-yellow-700",
+      icon: "text-yellow-600",
+      bg: "bg-yellow-100",
+      border: "border-yellow-300",
+      card: "bg-yellow-50 border-yellow-200",
+    },
+    cyan: {
+      title: "text-cyan-700",
+      icon: "text-cyan-600",
+      bg: "bg-cyan-100",
+      border: "border-cyan-300",
+      card: "bg-cyan-50 border-cyan-200",
+    },
+    purple: {
+      title: "text-purple-700",
+      icon: "text-purple-600",
+      bg: "bg-purple-100",
+      border: "border-purple-300",
+      card: "bg-purple-50 border-purple-200",
+    },
+    pink: {
+      title: "text-pink-700",
+      icon: "text-pink-600",
+      bg: "bg-pink-100",
+      border: "border-pink-300",
+      card: "bg-pink-50 border-pink-200",
+    },
+    orange: {
+      title: "text-orange-700",
+      icon: "text-orange-600",
+      bg: "bg-orange-100",
+      border: "border-orange-300",
+      card: "bg-orange-50 border-orange-200",
+    },
+  };
+
   const isOpen = openSection === id;
+  const styles = colorClasses[color];
 
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/60 backdrop-blur-md border border-purple-200 rounded-3xl shadow-xl p-6 cursor-pointer hover:scale-[1.01] transition-all duration-300"
+      className="bg-white rounded-xl shadow-md border p-4 cursor-pointer hover:shadow-lg transition-all"
       onClick={() => setOpenSection(isOpen ? null : id)}
     >
       {/* Header */}
@@ -39,10 +93,12 @@ const SectionCard = ({
         <div className="flex items-center gap-3">
           {icon}
 
-          <h2 className={`text-3xl font-bold text-${color}-700`}>{title}</h2>
+          <h2 className={`text-xl font-semibold text-${styles.title}-700`}>
+            {title}
+          </h2>
         </div>
 
-        <span className={`text-${color}-600 text-3xl font-bold`}>
+        <span className={`text-${styles.icon}-600 text-3xl font-bold`}>
           {isOpen ? "−" : "+"}
         </span>
       </div>
@@ -75,14 +131,14 @@ const SectionCard = ({
                 type === "tags" ? (
                   <div
                     key={index}
-                    className={`px-4 py-2 rounded-full bg-${color}-100 text-${color}-700 border border-${color}-300 shadow-sm`}
+                    className={`px-4 py-2 rounded-full bg-${styles.bg}-100 text-${styles.title}-700 border border-${styles.border}-300 shadow-sm`}
                   >
                     {item}
                   </div>
                 ) : (
                   <div
                     key={index}
-                    className={`px-4 py-3 rounded-2xl shadow-sm bg-${color}-100/60 border border-${color}-200 text-gray-700`}
+                    className={`px-4 py-3 rounded-xl shadow-sm ${styles.card} border text-gray-700`}
                   >
                     • {item}
                   </div>
@@ -104,7 +160,7 @@ const ResumeAnalysisPage = () => {
 
   const [openSection, setOpenSection] = useState(null);
   // ATS Score
-  const atsMatch = analysis.match(/ATS Match Percentage:\s*(\d+)/i)?.[1] || 75;
+  const atsMatch = analysis?.match(/ATS Match Percentage:\s*(\d+)/i)?.[1] || 75;
 
   // Structured parser
   const sections = {
@@ -119,7 +175,7 @@ const ResumeAnalysisPage = () => {
 
   let currentSection = "";
 
-  analysis.split("\n").forEach((line) => {
+  (analysis || "").split("\n").forEach((line) => {
     const cleanLine = line.trim();
 
     // Headings
@@ -191,6 +247,15 @@ const ResumeAnalysisPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-500 via-blue-200 to-cyan-200 p-6">
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
+        <div className="mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-800  text-white rounded-xl shadow-md hover:shadow-lg transition hover:scale-105"
+          >
+            <ArrowLeft size={18} />
+            Back
+          </button>
+        </div>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
@@ -202,25 +267,19 @@ const ResumeAnalysisPage = () => {
               <div className="flex items-center gap-3 mb-4">
                 <Sparkles className="w-10 h-10 text-purple-600" />
 
-                <h1 className="text-5xl font-bold text-gray-800">
+                <h1 className="text-3xl font-bold text-gray-800">
                   AI Resume Analysis
                 </h1>
               </div>
             </div>
 
             {/* ATS Circle */}
-            <div className="relative w-44 h-44">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 blur-2xl opacity-40"></div>
+            <div className="bg-green-50 border border-green-200 rounded-xl px-8 py-6 shadow-md">
+              <p className="text-gray-600 text-sm">ATS Score</p>
 
-              <div className="relative w-full h-full rounded-full border-[12px] border-green-500 bg-white flex items-center justify-center shadow-2xl">
-                <div className="text-center">
-                  <h2 className="text-5xl font-bold text-green-600">
-                    {atsMatch}%
-                  </h2>
-
-                  <p className="text-gray-600 font-semibold">ATS Match</p>
-                </div>
-              </div>
+              <h2 className="text-5xl font-bold text-green-600 mt-2">
+                {atsMatch}%
+              </h2>
             </div>
           </div>
         </motion.div>
@@ -308,16 +367,6 @@ const ResumeAnalysisPage = () => {
           setOpenSection={setOpenSection}
           hasContent={hasContent}
         />
-
-        {/* Bottom Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl shadow-xl hover:scale-105 transition-all duration-200"
-          >
-            Back
-          </button>
-        </div>
       </div>
     </div>
   );

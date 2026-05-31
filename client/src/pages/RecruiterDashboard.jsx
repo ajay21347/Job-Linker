@@ -21,6 +21,8 @@ import {
 import { useAiAssistant } from "@/context/AiAssistantContext";
 const RecruiterDashboard = () => {
   const [jobs, setJobs] = useState([]);
+
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const { open } = useAiAssistant();
@@ -36,7 +38,9 @@ const RecruiterDashboard = () => {
         );
         setJobs(myJobs);
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to load jobs");
+      } finally {
+        setLoading(false);
       }
     };
     fetchJobs();
@@ -53,6 +57,18 @@ const RecruiterDashboard = () => {
       toast.error(error.response?.data?.message || "Failed to delete job");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-md flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+
+          <p className="text-gray-600 font-medium">Loading jobs...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -72,11 +88,26 @@ const RecruiterDashboard = () => {
 
       {/* Job Grid */}
       {jobs.length === 0 ? (
-        <div
-          className="text-center text-gray-500 mt-10
-      "
-        >
-          No jobs posted yet.
+        <div className="flex justify-center mt-12">
+          <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">
+            <Briefcase className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+
+            <h2 className="text-xl font-semibold text-gray-800">
+              No Jobs Posted Yet
+            </h2>
+
+            <p className="text-gray-500 mt-2">
+              Create your first job posting to start receiving applications.
+            </p>
+
+            <Button
+              onClick={() => navigate("/create-job")}
+              className="mt-5 bg-purple-600 hover:bg-purple-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Post Your First Job
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid md:grid-cols-4 gap-2">

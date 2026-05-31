@@ -1,6 +1,7 @@
 import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import cloudinary from "../config/cloudinary.js";
 export const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -33,8 +34,6 @@ export const register = async (req, res) => {
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "10m",
     });
-
-    // verifyEmail(token, email);
 
     await User.updateOne({ _id: newUser._id }, { token });
 
@@ -175,6 +174,45 @@ export const getAllUsers = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const uploadProfilePic = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Delete old image if exists
+    if (user.profilePic?.public_id) {
+      await cloudinary.uploader.destroy(user.profilePic.public_id);
+    }
+
+    // Save new image
+    user.profilePic = {
+      url: req.file.path,
+      public_id: req.file.filename,
+    };
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      profilePic: user.profilePic,
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

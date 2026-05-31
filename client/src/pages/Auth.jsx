@@ -8,7 +8,9 @@ import { toast } from "sonner";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -16,45 +18,84 @@ const Auth = () => {
     role: "seeker",
   });
 
-  const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+
+    // Login Validation
+    if (isLogin) {
+      if (!data.email.trim() || !data.password.trim()) {
+        toast.error("Please fill all fields");
+        return;
+      }
+    }
+
+    //Register Validation
+    if (!isLogin) {
+      if (!data.name.trim() || !data.email.trim() || !data.password.trim()) {
+        toast.error("Please fill all fields");
+        return;
+      }
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(data.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    if (!isLogin && data.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
 
     const url = isLogin
       ? "http://localhost:5000/api/v1/user/login"
       : "http://localhost:5000/api/v1/user/register";
 
+    const loadingToast = toast.loading(
+      isLogin ? "Signing in..." : "Creating account...",
+    );
+
     try {
+      setLoading(true);
       const res = await axios.post(url, data);
+
       if (!isLogin) {
-        toast.success("Registered Successfully");
+        toast.success("Registered Successfully! Please login", {
+          id: loadingToast,
+        });
 
         setTimeout(() => {
           setIsLogin(true);
-        }, 1000);
+        }, 1500);
         return;
       }
 
-      if (isLogin) {
-        localStorage.setItem("token", res.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        const firstName = res.data.user.name.split(" ")[0];
-        toast.success(`Welcome back, ${firstName}`);
+      localStorage.setItem("token", res.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const firstName = res.data.user.name.split(" ")[0];
+      toast.success(`Welcome back, ${firstName}`, {
+        id: loadingToast,
+      });
 
-        const role = res.data.user.role;
+      const role = res.data.user.role;
 
-        if (role === "admin") {
-          navigate("/admin-dashboard");
-        } else if (role === "recruiter") {
-          navigate("/recruiter-dashboard");
-        } else {
-          navigate("/seeker-dashboard");
-        }
+      if (role === "admin") {
+        navigate("/admin-dashboard");
+      } else if (role === "recruiter") {
+        navigate("/recruiter-dashboard");
+      } else {
+        navigate("/seeker-dashboard");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Something went wrong");
+      toast.error(err.response?.data?.message || "Something went wrong", {
+        id: loadingToast,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,6 +127,7 @@ const Auth = () => {
             </div>
           )}
 
+          {/* Email */}
           <div>
             <label className="block mb-2 text-sm">Email Address</label>{" "}
             <Input
@@ -117,10 +159,6 @@ const Auth = () => {
           </div>
           {isLogin && (
             <div className="flex justify-between text-sm">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" />
-                Remember me
-              </label>
               <span className="text-purple-600 cursor-pointer">
                 Forgot Password
               </span>
@@ -169,16 +207,23 @@ const Auth = () => {
           )}
 
           <Button
-            className="w-full h-12 bg-purple-600 hover:bg-purple-700 transition-all duration-300 hover:scale-105 active:scale-95
+            disabled={loading}
+            className="w-full h-12 text-white bg-purple-600 hover:bg-purple-700 transition-all duration-300 hover:scale-105 active:scale-95
           "
           >
-            {isLogin ? "Sign in" : "Sign up"}
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : isLogin ? (
+              "Sign in"
+            ) : (
+              "Sign up"
+            )}
           </Button>
 
           <p className="text-sm text-center text-gray-500">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <span
-              className="text-purple-600 cursor-pointer font-medium"
+              className="text-purple-600 cursor-pointer font-medium hover:underline"
               onClick={() => setIsLogin(!isLogin)}
             >
               {isLogin ? "Sign up" : "Login"}

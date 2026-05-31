@@ -103,6 +103,12 @@ const JobDetails = () => {
   const applyWithNewResume = async () => {
     try {
       setLoading("upload", true);
+
+      if (!file) {
+        toast.warning("Please select a resume file");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("jobId", job._id);
       formData.append("resume", file);
@@ -122,6 +128,8 @@ const JobDetails = () => {
     try {
       setLoading("analyze", true);
       const res = await api.post("/ai/analyze-job-match", { jobId: job._id });
+
+      toast.success("Job match analysis completed");
 
       navigate("/resume-analysis", {
         state: { analysis: res.data.analysis },
@@ -237,7 +245,11 @@ const JobDetails = () => {
                 </Button>
 
                 <Button
-                  onClick={() => navigate(`/mock-interview/${job._id}`)}
+                  onClick={() => {
+                    toast.success("Starting AI Mock Interview");
+
+                    navigate(`/mock-interview/${job._id}`);
+                  }}
                   className="  bg-gradient-to-r from-fuchsia-500 to-indigo-500 hover:from-fuchsia-600 hover:to-indigo-600 px-6 py-3 text-white font-bold shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2"
                 >
                   <Sparkle className="w-4 h-4" />
@@ -317,12 +329,13 @@ const JobDetails = () => {
           <div className="flex flex-col gap-4">
             <Button
               variant="outline"
-              onClick={() =>
+              onClick={() => {
+                toast.info("Opening resume...");
                 window.open(
                   `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(user.resume?.url)}`,
                   "_blank",
-                )
-              }
+                );
+              }}
             >
               View Current Resume
             </Button>

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDeadlineText, getPostedTime } from "@/utils/jobUtils";
 import { useAiAssistant } from "@/context/AiAssistantContext";
+import { toast } from "sonner";
 
 const SeekerDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -13,6 +14,7 @@ const SeekerDashboard = () => {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const navigate = useNavigate();
   const { open } = useAiAssistant();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -33,11 +35,42 @@ const SeekerDashboard = () => {
         }
         setAppliedJobs(applied);
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to load jobs");
+      } finally {
+        setLoading(false);
       }
     };
     fetchJobs();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-md flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+
+          <p className="text-gray-600 font-medium">Loading jobs...</p>
+        </div>
+      </div>
+    );
+  }
+  if (jobs.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">
+          <Briefcase className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+
+          <h2 className="text-xl font-semibold text-gray-800">
+            No Jobs Available
+          </h2>
+
+          <p className="text-gray-500 mt-2">
+            There are currently no job postings available.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const filteredJobs = jobs.filter((job) =>
     `${job.title} ${job.company} ${job.location} ${job.jobType}`
@@ -113,7 +146,7 @@ const SeekerDashboard = () => {
                 {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}
               </div>
               <div
-                className={`text-xs${
+                className={`text-xs ${
                   appliedJobs.includes(job._id)
                     ? "text-green-100"
                     : "text-gray-500"

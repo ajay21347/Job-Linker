@@ -9,6 +9,10 @@ const analysisSchema = new mongoose.Schema(
     type: { type: String, enum: ["resume", "job-match"] },
     atsScore: Number,
     analysis: String,
+    resumeUrl: {
+      type: String,
+      default: "",
+    },
     job: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Job",

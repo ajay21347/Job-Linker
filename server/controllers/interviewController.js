@@ -129,11 +129,11 @@ export const getInterviewHistory = async (req, res) => {
   try {
     const interviews = await Interview.find({
       user: req.user.id,
+      completed: true,
+      "transcript.0": { $exists: true },
     })
       .populate("job", "title company")
-      .sort({
-        createdAt: -1,
-      });
+      .sort({ createdAt: -1 });
 
     return res.status(200).json(interviews);
   } catch (error) {

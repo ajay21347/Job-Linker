@@ -4,6 +4,7 @@ import InterviewInput from "@/components/interview/InterviewInput";
 import api from "@/utils/api";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 const MockInterview = () => {
   const [messages, setMessages] = useState([]);
@@ -108,7 +109,7 @@ const MockInterview = () => {
         setDbInterviewId(res.data.interviewId);
         setJobRole(res.data.jobTitle);
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to start interview");
       }
     };
     startInterview();
@@ -124,7 +125,10 @@ const MockInterview = () => {
   }, []);
 
   //Save Interview
-  const saveInterview = async (transcriptData = messages) => {
+  const saveInterview = async (
+    transcriptData = messages,
+    showToast = false,
+  ) => {
     if (!dbInterviewId) return;
 
     try {
@@ -133,14 +137,20 @@ const MockInterview = () => {
         transcript: transcriptData,
         duration: Math.floor(timer / 60),
       });
+      if (showToast) {
+        toast.success("Interview saved successfully");
+      }
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to save interview");
     }
   };
 
   // Submit Answer
   const handleSubmit = async () => {
-    if (!currentAnswer.trim()) return;
+    if (!currentAnswer.trim()) {
+      toast.warning("Please enter an answer");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -206,7 +216,7 @@ const MockInterview = () => {
         setCurrentQuestionIndex(nextIndex);
       }, 3000);
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to generate  feedback");
     } finally {
       setLoading(false);
     }
@@ -227,6 +237,8 @@ const MockInterview = () => {
 
       setShowContinuePrompt(false);
 
+      toast.success("New interview questions generated");
+
       setMessages((prev) => [
         ...prev,
         {
@@ -237,12 +249,14 @@ const MockInterview = () => {
       ]);
       speakQuestion(res.data.questions[0]);
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to generate more questions");
     }
   };
 
   const handleFinish = async () => {
     setShowContinuePrompt(false);
+
+    toast.success("Interview Completed");
 
     setMessages((prev) => {
       const updated = [
@@ -280,7 +294,7 @@ const MockInterview = () => {
               <button
                 onClick={async () => {
                   speechSynthesis.cancel();
-                  await saveInterview();
+                  await saveInterview(messages, true);
                   navigate(-1);
                 }}
                 className="px-5 py-2 rounded-xl bg-red-500 text-white"
@@ -303,7 +317,10 @@ const MockInterview = () => {
           setMicEnabled={setMicEnabled}
           darkMode={darkMode}
           setDarkMode={setDarkMode}
-          onExit={() => setShowExitDialog(true)}
+          onExit={() => {
+            toast.warning("Leaving will save current progress");
+            setShowExitDialog(true);
+          }}
           currentQuestionIndex={currentQuestionIndex}
         />
 

@@ -14,11 +14,14 @@ import {
   ArrowUpDown,
   Eye,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [notifications, setNotifications] = useState(0);
   const [sortBy, setSortBy] = useState("latest");
+
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -35,7 +38,9 @@ const MyApplications = () => {
 
         setNotifications(updated.length);
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to load applications");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -77,10 +82,35 @@ const MyApplications = () => {
     (app) => app.status === "rejected",
   ).length;
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-md flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+
+          <p className="text-gray-600 font-medium">Loading applications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (applications.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-md text-center">
+          <h2 className="text-xl font-semibold">No Applications Yet</h2>
+          <p className="text-gray-500 mt-2">
+            Start applying for jobs to track them here.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 ">
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto p-6 md:p-8">
+      <div className="max-w-6xl mx-auto p-6 md:p-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-8">
           <div>

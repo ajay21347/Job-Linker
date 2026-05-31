@@ -114,6 +114,7 @@ export const analyzeResumeOpenAI = async (req, res) => {
       type: "resume",
       atsScore: Number(atsMatch),
       analysis,
+      resumeUrl: user?.resume?.url || "",
     });
 
     return res.status(200).json({
@@ -221,6 +222,8 @@ Rules:
       type: "job-match",
       atsScore: Number(atsMatch),
       analysis,
+      resumeUrl: user?.resume?.url || "",
+      job: jobId,
     });
 
     return res.status(200).json({ success: true, analysis });
@@ -234,13 +237,19 @@ Rules:
 // Analysis History
 export const getAnalysisHistory = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const { sort = "latest" } = req.query;
+
+    let sortOption = { createdAt: -1 };
+
+    if (sort === "oldest") {
+      sortOption = { createdAt: 1 };
+    }
 
     const history = await Analysis.find({
-      user: userId,
+      user: req.user.id,
     })
-      .sort({ createdAt: -1 })
-      .populate("job", "title company");
+      .populate("job", "title company")
+      .sort(sortOption);
 
     return res.status(200).json({ success: true, history });
   } catch (error) {
@@ -434,12 +443,19 @@ ${resumeText}
 //Ai Analysis History
 export const getAnalysisById = async (req, res) => {
   try {
-    const analysis = await Analysis.findById(req.params.id);
+    const analysis = await Analysis.findById(req.params.id).populate(
+      "job",
+      "title company",
+    );
+
+    if (!analysis) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Analysis not found" });
+    }
 
     res.json(analysis);
   } catch (error) {
-    console.log(error);
-
     res.status(500).json({
       success: false,
       message: "Failed to fetch analysis",

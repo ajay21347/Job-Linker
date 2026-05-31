@@ -16,7 +16,16 @@ const userSchema = new mongoose.Schema(
     },
     bio: { type: String, default: "" },
     resume: { url: String, public_id: String },
-    profilePic: { type: String, default: "" },
+    profilePic: {
+      url: {
+        type: String,
+        default: "",
+      },
+      public_id: {
+        type: String,
+        default: "",
+      },
+    },
     token: { type: String, default: null },
     isLoggedIn: { type: Boolean, default: false },
   },

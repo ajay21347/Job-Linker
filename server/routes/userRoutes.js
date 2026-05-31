@@ -4,6 +4,7 @@ import {
   login,
   register,
   updateProfile,
+  uploadProfilePic,
   uploadResume,
 } from "../controllers/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -17,5 +18,11 @@ router.post("/register", register);
 router.put("/profile", protect, updateProfile);
 router.get("/all-users", protect, getAllUsers);
 router.put("/upload-resume", protect, upload.single("resume"), uploadResume);
+router.put(
+  "/upload-profile-pic",
+  protect,
+  upload.single("profilePic"),
+  uploadProfilePic,
+);
 
 export default router;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 import { ArrowLeft, Download } from "lucide-react";
+import { toast } from "sonner";
 
 const InterviewDetails = () => {
   const { id } = useParams();
@@ -17,11 +18,9 @@ const InterviewDetails = () => {
       try {
         const res = await api.get(`/interview/${id}`);
 
-        console.log("Interview Details:", res.data);
-
         setInterview(res.data);
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to load interview details");
       } finally {
         setLoading(false);
       }
@@ -48,6 +47,7 @@ const InterviewDetails = () => {
     link.download = `${interview.job?.title || "Interview"}.txt`;
 
     link.click();
+    toast.success("Transcript downloaded");
   };
 
   if (loading) {

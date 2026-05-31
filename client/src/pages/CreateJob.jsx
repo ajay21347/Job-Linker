@@ -55,12 +55,43 @@ const CreateJob = () => {
   }, [id]);
 
   const handleSubmit = async () => {
+    if (
+      (!form.title.trim() || !form.company.trim() || !form,
+      location.trim() || !form.description.trim())
+    ) {
+      toast.warning("Please fill all required fields");
+      return;
+    }
+
+    if (!form.deadline) {
+      toast.warning("Please select an application deadline");
+      return;
+    }
+
+    if (form.salary && Number(form.salary) < 0) {
+      toast.warning("Salary cannot be negative");
+      return;
+    }
+
+    if (new Date(form.deadline) < new Date()) {
+      toast.warning("Deadline cannot be in the past");
+      return;
+    }
+
+    const loadingToast = toast.loading(
+      id ? "Updating job..." : "Posting job...",
+    );
+
     try {
       if (id) {
         await api.put(`/jobs/update/${id}`, form);
+
+        toast.dismiss(loadingToast);
         toast.success("Job updated successfully");
       } else {
         await api.post("/jobs/create", form);
+
+        toast.dismiss(loadingToast);
         toast.success("Job posted successfully ");
       }
 
@@ -68,6 +99,8 @@ const CreateJob = () => {
         navigate("/recruiter-dashboard");
       }, 1000);
     } catch (error) {
+      toast.dismiss(loadingToast);
+
       toast.error(error.response?.data?.message || "Something went wrong");
     }
   };

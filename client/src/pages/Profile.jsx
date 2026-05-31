@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import api from "@/utils/api";
 import {
+  Camera,
   Download,
   Eye,
   FileText,
@@ -21,6 +22,8 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const [profilePicFile, setProfilePicFile] = useState(null);
+  const [profilePicLoading, setProfilePicLoading] = useState(false);
   const resumeUploadRef = useRef(null);
   const navigate = useNavigate();
 
@@ -30,6 +33,7 @@ const Profile = () => {
     preferences: storedUser?.preferences || "",
     bio: storedUser?.bio || "",
     resume: storedUser?.resume || {},
+    profilePic: storedUser?.profilePic || {},
   });
 
   const handleChange = (e) => {
@@ -76,7 +80,6 @@ const Profile = () => {
     try {
       setLoadingAI(true);
 
-      // New controller already checks resume existence
       const res = await api.post("/ai/analyze-resume");
 
       toast.success("Resume analyzed successfully");
@@ -86,7 +89,6 @@ const Profile = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "AI analysis failed");
 
-      // Optional scroll to upload section if no resume
       if (error.response?.data?.message === "Please upload resume first") {
         setIsEditing(true);
 
@@ -102,6 +104,48 @@ const Profile = () => {
     }
   };
 
+  const handleProfilePicUpload = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    setProfilePicFile(file);
+  };
+
+  const updateProfilePic = async () => {
+    try {
+      if (profilePicLoading) return;
+
+      setProfilePicLoading(true);
+
+      if (!profilePicFile) {
+        return toast.error("Select an image first");
+      }
+
+      const formData = new FormData();
+
+      formData.append("profilePic", profilePicFile);
+
+      const res = await api.put("/user/upload-profile-pic", formData);
+
+      const updatedUser = { ...user, profilePic: res.data.profilePic };
+
+      setUser(updatedUser);
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      setProfilePicFile(null);
+
+      toast.success("Profile picture updated successfully");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update profile picture",
+      );
+    } finally {
+      setProfilePicLoading;
+    }
+  };
   const handleSave = async () => {
     try {
       const profileData = {
@@ -156,7 +200,7 @@ const Profile = () => {
                 <Button
                   variant="outline"
                   onClick={() => setIsEditing(true)}
-                  className="hover:bg-green-500 hover:scale-105 transition-all duration-200"
+                  className="hover:bg-green-500 hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 shadow-md hover:shadow-green-300 border-green-200 "
                 >
                   <Pencil className="w-4 h-4 mr-2" />
                 </Button>{" "}
@@ -164,8 +208,30 @@ const Profile = () => {
             )}
           </div>
           <div className="flex flex-col items-center gap-3">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg flex items-center justify-center hover:scale-105 transition text-white text-2xl font-bold">
-              {user?.name?.charAt(0).toUpperCase()}
+            <div className="relative">
+              {user?.profilePic?.url ? (
+                <img
+                  src={user.profilePic.url}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg transition-transform duration-300 hover:scale-105
+                  hover:shadow-purple-300"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg flex items-center justify-center text-white text-2xl font-bold">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
+              )}{" "}
+              {isEditing && (
+                <label className="absolute bottom-0 right-0  w-8 h-8 bg-purple-600   hover:bg-purple-700 rounded-full flex   items-center justify-center  cursor-pointer text-white shadow-lg hover:scale-110 active:scale-95 transition-all   duration-300 ">
+                  <Camera size={16} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePicUpload}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
             <h2 className="text-xl font-semibold">{user?.name}</h2>
             <p className="text-gray-500 uppercase font-bold">{user?.role}</p>
@@ -214,6 +280,30 @@ const Profile = () => {
               onChange={handleChange}
               className=" bg-white/70 focus:bg-white w-full border rounded p-3 h-24 resize-none placeholder:text-gray-600 disabled:opacity-100 text-gray-400 focus:ring-2 focus:ring-purple-400"
             />
+            {isEditing && (
+              <div className="flex flex-col gap-2">
+                {profilePicFile && (
+                  <>
+                    <img
+                      src={URL.createObjectURL(profilePicFile)}
+                      alt="Preview"
+                      className="w-20 h-20 rounded-full object-cover border "
+                    />
+                    <Button
+                      onClick={updateProfilePic}
+                      disabled={profilePicLoading}
+                      className="bg-purple-600 hover:bg-purple-700hover:scale-105active:scale-95 transition-all duration-300 shadow-md hover:shadow-purple-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 "
+                    >
+                      {profilePicLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        "Update Profile Picture"
+                      )}
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
             {user?.role === "seeker" && (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
@@ -249,6 +339,7 @@ const Profile = () => {
                       onClick={() => navigate("/history")}
                       className="bg-yellow-500 hover:bg-yellow-400 rounded-xl hover:scale-105 border-none shadow-sm"
                     >
+                      <History className="w-4 h-4" />
                       History Center
                     </Button>
 

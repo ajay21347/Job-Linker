@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import api from "@/utils/api";
 import { Users, Briefcase } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -16,7 +17,7 @@ const AdminDashboard = () => {
         setUsers(userRes.data.users);
         setJobs(jobRes.data.jobs);
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to load dashboard data");
       }
     };
 
@@ -27,13 +28,9 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-8">
       {/* Heading */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Admin Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
 
-        <p className="text-gray-500 mt-1">
-          Platform overview and statistics
-        </p>
+        <p className="text-gray-500 mt-1">Platform overview and statistics</p>
       </div>
 
       {/* Stats Cards */}
@@ -44,13 +41,9 @@ const AdminDashboard = () => {
             <Users className="w-10 h-10 text-blue-600" />
 
             <div>
-              <p className="text-gray-500 text-sm">
-                Total Users
-              </p>
+              <p className="text-gray-500 text-sm">Total Users</p>
 
-              <h2 className="text-3xl font-bold">
-                {users.length}
-              </h2>
+              <h2 className="text-3xl font-bold">{users.length}</h2>
             </div>
           </CardContent>
         </Card>
@@ -61,13 +54,9 @@ const AdminDashboard = () => {
             <Briefcase className="w-10 h-10 text-purple-600" />
 
             <div>
-              <p className="text-gray-500 text-sm">
-                Total Job Posts
-              </p>
+              <p className="text-gray-500 text-sm">Total Job Posts</p>
 
-              <h2 className="text-3xl font-bold">
-                {jobs.length}
-              </h2>
+              <h2 className="text-3xl font-bold">{jobs.length}</h2>
             </div>
           </CardContent>
         </Card>

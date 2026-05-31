@@ -4,8 +4,14 @@ import AnalysisHistoryTab from "@/components/history/AnalysisHistoryTab";
 import InterviewHistoryTab from "@/components/history/InterviewHistoryTab";
 
 const HistoryCenter = () => {
-  const [activeTab, setActiveTab] = useState("analysis");
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("historyTab") || "analysis",
+  );
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem("historyTab", tab);
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-100 to-cyan-100">
       {/* HEADER */}
@@ -35,24 +41,26 @@ const HistoryCenter = () => {
       <div className="max-w-7xl mx-auto px-8 pt-8">
         <div className="bg-white rounded-3xl p-2 shadow-lg inline-flex gap-2">
           <button
-            onClick={() => setActiveTab("analysis")}
-            className={`px-8 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+            onClick={() => handleTabChange("analysis")}
+            className={`flex items-center gap-2 px-8 py-3 rounded-2xl font-semibold transition-all duration-300 ${
               activeTab === "analysis"
                 ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
+            <Brain className="w-4 h-4" />
             Analysis History
           </button>
 
           <button
-            onClick={() => setActiveTab("interview")}
-            className={`px-8 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+            onClick={() => handleTabChange("interview")}
+            className={`flex items-center gap-2 px-8 py-3 rounded-2xl font-semibold transition-all duration-300 ${
               activeTab === "interview"
                 ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
+            <History className="w-4 h-4" />
             Interview History
           </button>
         </div>

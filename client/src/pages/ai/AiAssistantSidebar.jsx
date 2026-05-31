@@ -5,7 +5,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 
-import { Sparkles, Minus, X, ChevronLeft } from "lucide-react";
+import { Sparkles, Minus, X } from "lucide-react";
 
 import { useAiAssistant } from "@/context/AiAssistantContext";
 

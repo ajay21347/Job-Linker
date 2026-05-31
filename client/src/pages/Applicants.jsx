@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 const Applicants = () => {
   const { jobId } = useParams();
@@ -24,7 +25,7 @@ const Applicants = () => {
         const res = await api.get(`/application/applicants/${jobId}`);
         setApplications(res.data.applications);
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to load applicants");
       }
     };
     fetchApplicants();
@@ -33,6 +34,13 @@ const Applicants = () => {
   const updateStatus = async (id, status) => {
     try {
       await api.put(`/application/update-status/${id}`, { status });
+
+      if (status === "accepted") {
+        toast.success("Applicant accepted");
+      }
+      if (status === "rejected") {
+        toast.success("Applicant rejected");
+      }
 
       setApplications((prev) =>
         prev.map((app) =>
@@ -45,7 +53,7 @@ const Applicants = () => {
         ),
       );
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to update applicant status");
     }
   };
 
@@ -171,12 +179,13 @@ const Applicants = () => {
 
                     <Button
                       className="bg-purple-500 hover:bg-purple-700 rounded-xl"
-                      onClick={() =>
+                      onClick={() => {
+                        toast.info("Opening resume...");
                         window.open(
                           `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(app.resume?.url)}`,
                           "_blank",
-                        )
-                      }
+                        );
+                      }}
                     >
                       View Resume
                     </Button>
