@@ -12,6 +12,9 @@ import {
   Pencil,
   Phone,
   User2,
+  ChevronDown,
+  Lock,
+  EyeOff,
 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +27,16 @@ const Profile = () => {
   const [loadingAI, setLoadingAI] = useState(false);
   const [profilePicFile, setProfilePicFile] = useState(null);
   const [profilePicLoading, setProfilePicLoading] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const [showPasswords, setShowPasswords] = useState(false);
+
+  const [showSecurity, setShowSecurity] = useState(false);
   const resumeUploadRef = useRef(null);
   const navigate = useNavigate();
 
@@ -143,9 +156,47 @@ const Profile = () => {
         error.response?.data?.message || "Failed to update profile picture",
       );
     } finally {
-      setProfilePicLoading;
+      setProfilePicLoading(false);
     }
   };
+
+  const handleChangePassword = async () => {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+
+      const res = await api.put("/user/change-password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      toast.success(res.data.message);
+
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to change password");
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
       const profileData = {
@@ -183,7 +234,17 @@ const Profile = () => {
                 <Button
                   variant="secondary"
                   className="hover:scale-105 hover:bg-gray-300 "
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setShowSecurity(false);
+                    setShowPasswords(false);
+
+                    setPasswordData({
+                      currentPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
+                    });
+                  }}
                 >
                   Cancel
                 </Button>
@@ -292,7 +353,7 @@ const Profile = () => {
                     <Button
                       onClick={updateProfilePic}
                       disabled={profilePicLoading}
-                      className="bg-purple-600 hover:bg-purple-700hover:scale-105active:scale-95 transition-all duration-300 shadow-md hover:shadow-purple-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 "
+                      className="bg-purple-600 hover:bg-purple-700 hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-purple-300 disabled:opacity-50 disabled:cursor-not-allowed  disabled:hover:scale-100 "
                     >
                       {profilePicLoading ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -371,6 +432,125 @@ const Profile = () => {
                         Update
                       </Button>
                     )}
+                  </div>
+                )}
+              </div>
+            )}
+            {isEditing && (
+              <div className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 mt-4">
+                <button
+                  onClick={() => setShowSecurity(!showSecurity)}
+                  className="w-full flex items-center justify-between text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-5 h-5 text-purple-600" />
+                    <h3 className="text-lg font-semibold">Change Password</h3>
+                  </div>
+
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${
+                      showSecurity ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {showSecurity && (
+                  <div className="space-y-4 mt-5 animate-in fade-in duration-300">
+                    {/* Current Password */}
+                    <div className="relative">
+                      <Input
+                        type={showPasswords ? "text" : "password"}
+                        placeholder="Current Password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            currentPassword: e.target.value,
+                          })
+                        }
+                        className="pr-10"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswords(!showPasswords)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600"
+                      >
+                        {showPasswords ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* New Password */}
+                    <div className="relative">
+                      <Input
+                        type={showPasswords ? "text" : "password"}
+                        placeholder="New Password"
+                        value={passwordData.newPassword}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            newPassword: e.target.value,
+                          })
+                        }
+                        className="pr-10"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswords(!showPasswords)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600"
+                      >
+                        {showPasswords ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div className="relative">
+                      <Input
+                        type={showPasswords ? "text" : "password"}
+                        placeholder="Confirm Password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
+                        className="pr-10"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswords(!showPasswords)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600"
+                      >
+                        {showPasswords ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+
+                    <Button
+                      onClick={handleChangePassword}
+                      disabled={passwordLoading}
+                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-[1.02] transition-all duration-300"
+                    >
+                      {passwordLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+                      ) : (
+                        "Change Password"
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>

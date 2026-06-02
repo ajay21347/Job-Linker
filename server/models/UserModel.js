@@ -10,24 +10,17 @@ const userSchema = new mongoose.Schema(
       enum: ["seeker", "recruiter", "admin"],
       default: "seeker",
     },
-    phone: {
-      type: String,
-      default: "",
-    },
+    phone: { type: String, default: "" },
     bio: { type: String, default: "" },
     resume: { url: String, public_id: String },
     profilePic: {
-      url: {
-        type: String,
-        default: "",
-      },
-      public_id: {
-        type: String,
-        default: "",
-      },
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" },
     },
     token: { type: String, default: null },
-    isLoggedIn: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordExpires: { type: Date, default: null },
   },
   {
     timestamps: true,

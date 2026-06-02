@@ -17,6 +17,8 @@ import MockInterview from "./pages/MockInterview";
 import InterviewDetails from "./pages/history/InterviewDetails";
 import HistoryCenter from "./pages/history/HistoryCenter";
 import AnalysisDetails from "./pages/history/AnalysisDetails";
+import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +64,22 @@ export const router = createBrowserRouter([
       <>
         <Navbar />
         <JobDetails />
+      </>
+    ),
+  },
+  {
+    path: "/verify-email/:token",
+    element: (
+      <>
+        <VerifyEmail />
+      </>
+    ),
+  },
+  {
+    path: "/reset-password/:token",
+    element: (
+      <>
+        <ResetPassword />
       </>
     ),
   },
