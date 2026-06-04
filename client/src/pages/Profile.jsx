@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Lock,
   EyeOff,
+  Trash2,
 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +38,7 @@ const Profile = () => {
   const [showPasswords, setShowPasswords] = useState(false);
 
   const [showSecurity, setShowSecurity] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const resumeUploadRef = useRef(null);
   const navigate = useNavigate();
 
@@ -139,7 +141,15 @@ const Profile = () => {
 
       formData.append("profilePic", profilePicFile);
 
-      const res = await api.put("/user/upload-profile-pic", formData);
+      const res = await api.put("/user/upload-profile-pic", formData, {
+        onUploadProgress: (ProgressEvent) => {
+          const percent = Math.round(
+            (ProgressEvent.loaded * 100) / ProgressEvent.total,
+          );
+
+          setUploadProgress(percent);
+        },
+      });
 
       const updatedUser = { ...user, profilePic: res.data.profilePic };
 
@@ -157,6 +167,23 @@ const Profile = () => {
       );
     } finally {
       setProfilePicLoading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const deleteProfilePic = async () => {
+    try {
+      const res = await api.delete("/user/delete-profile-pic");
+
+      const updatedUser = { ...user, profilePic: res.data.profilePic };
+
+      setUser(updatedUser);
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to remove picture");
     }
   };
 
@@ -195,6 +222,20 @@ const Profile = () => {
     } finally {
       setPasswordLoading(false);
     }
+  };
+
+  const getProfileCompletion = () => {
+    let score = 0;
+
+    if (user?.name) score += 20;
+    if (user?.email) score += 20;
+    if (user?.phone) score += 15;
+    if (user?.bio) score += 15;
+    if (user?.profilePic?.url) score += 15;
+    if (user?.role === "seeker" && user?.resume?.url) score += 15;
+    if (user?.role !== "seeker") score += 15;
+
+    return score;
   };
 
   const handleSave = async () => {
@@ -283,19 +324,62 @@ const Profile = () => {
                 </div>
               )}{" "}
               {isEditing && (
-                <label className="absolute bottom-0 right-0  w-8 h-8 bg-purple-600   hover:bg-purple-700 rounded-full flex   items-center justify-center  cursor-pointer text-white shadow-lg hover:scale-110 active:scale-95 transition-all   duration-300 ">
-                  <Camera size={16} />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProfilePicUpload}
-                    className="hidden"
-                  />
-                </label>
+                <>
+                  <label className="absolute bottom-0 right-0 w-8 h-8 bg-purple-600 hover:bg-purple-700 rounded-full flex items-center justify-center cursor-pointer text-white shadow-lg hover:scale-110 active:scale-95 transition-all duration-300">
+                    <Camera size={16} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePicUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </>
               )}
             </div>
+
             <h2 className="text-xl font-semibold">{user?.name}</h2>
+
+            {isEditing && user?.profilePic?.url && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={deleteProfilePic}
+                className="h-7 px-3 text-xs text-red-500 hover:text-red-700 hover:scale-105 transition-all duration-300"
+              >
+                <Trash2 className="w-3 h-3 " />
+                Remove
+              </Button>
+            )}
             <p className="text-gray-500 uppercase font-bold">{user?.role}</p>
+
+            <div className="w-full max-w-xs mt-2">
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-600">Profile Completion</span>
+
+                <span
+                  className={`font-semibold ${getProfileCompletion() === 100 ? "text-green-600" : "text-purple-600"}`}
+                >
+                  {getProfileCompletion()}%
+                </span>
+              </div>
+
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 transition-all duration-700"
+                  style={{
+                    width: `${getProfileCompletion()}%`,
+                  }}
+                />
+              </div>
+              {getProfileCompletion() === 100 && (
+                <p className="text-green-600 text-sm mt-2 font-medium text-center">
+                  {" "}
+                  ✓ Profile Complete
+                </p>
+              )}
+            </div>
+
             <h3 className="text-sm font-semibold text-gray-500 uppercase ">
               Personal Info
             </h3>
@@ -350,6 +434,22 @@ const Profile = () => {
                       alt="Preview"
                       className="w-20 h-20 rounded-full object-cover border "
                     />
+                    {profilePicLoading && (
+                      <div className="w-full mt-2">
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-purple-600 transition-all duration-300"
+                            style={{
+                              width: `${uploadProgress}%`,
+                            }}
+                          />
+                        </div>
+
+                        <p className="text-xs text-center mt-1 text-gray-600">
+                          Uploading {uploadProgress}%
+                        </p>
+                      </div>
+                    )}
                     <Button
                       onClick={updateProfilePic}
                       disabled={profilePicLoading}
