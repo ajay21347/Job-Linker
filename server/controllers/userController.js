@@ -451,3 +451,35 @@ export const changePassword = async (req, res) => {
     });
   }
 };
+
+export const deleteProfilePic = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.profilePic?.public_id) {
+      await cloudinary.uploader.destroy(user.profilePic.public_id);
+    }
+
+    user.profilePic = {
+      url: "",
+      public_id: "",
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile picture removed successfully",
+      profilePic: user.profilePic,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message() });
+  }
+};

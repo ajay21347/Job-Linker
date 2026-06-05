@@ -79,7 +79,7 @@ const RecruiterDashboard = () => {
 
         <Button
           onClick={() => navigate("/create-job")}
-          className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2 mt-5"
+          className="bg-purple-600 hover:bg-purple-700 flex text-white items-center gap-2 mt-5"
         >
           <Plus className="w-4 h-4 mr-1" />
           Post Job
@@ -110,37 +110,39 @@ const RecruiterDashboard = () => {
           </div>
         </div>
       ) : (
-        <div className="grid md:grid-cols-4 gap-2">
+        <div className="grid md:grid-cols-4 gap-6">
           {jobs.map((job) => (
             <Card
               key={job._id}
-              className="hover:shadow-2xl hover:scale-105 transition-all duration-300 "
+              onClick={() => navigate(`/job/${job._id}`)}
+              className="cursor-pointer bg-white border-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
             >
               <CardContent className="p-5 flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="text-purple-600 w-5 h-5 " />
-                  <h2 className="text-lg font-semibold">{job.title}</h2>
-                </div>
-                <p className="text-gray-600">{job.company}</p>
+                <h2 className="text-lg font-bold text-black">{job.title}</h2>
+
+                <p className="font-medium text-gray-600">{job.company}</p>
+
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <MapPin className="w-4 h-4" />
                   {job.location}
                 </div>
 
-                <div className="flex justify-between mt-3">
-                  <span className="text-sm text-green-600">
-                    ₹
-                    {job.salary
-                      ? `${job.salary.toLocaleString("en-IN")} P.A.`
-                      : "N/A"}
-                  </span>
-                  <span className="text-sm text-purple-600">
-                    {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}
-                  </span>
+                <div className="flex items-center gap-2 text-green-600">
+                  ₹
+                  {job.salary
+                    ? `${job.salary.toLocaleString("en-IN")} P.A.`
+                    : "Not disclosed"}
                 </div>
+
+                <div className="flex items-center gap-2 text-sm text-purple-600">
+                  <Briefcase className="w-4 h-4" />
+                  {job.jobType.replace(/\b\w/g, (char) => char.toUpperCase())}
+                </div>
+
                 <div className="text-xs text-gray-500">
                   {getPostedTime(job.createdAt)}
                 </div>
+
                 <div className="text-sm font-medium">
                   {getDeadlineText(job.deadline) === "Expired" ? (
                     <span className="text-red-600">Expired</span>
@@ -151,22 +153,18 @@ const RecruiterDashboard = () => {
                   )}
                 </div>
 
-                <div className="flex gap-2 mt-3">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => navigate(`/job/${job._id}`)}
-                    className="hover:underline  underline-offset-4 hover:text-blue-600
-                    transition-all duration-200"
-                  >
-                    View
-                  </Button>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm font-medium text-purple-600 hover:underline">
+                    View Details
+                  </span>
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
                         size="sm"
                         variant="destructive"
-                        className="hover:underline underline-offset-4 hover:text-red-500 transition-all duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-sm font-medium text-red-600 hover:underline"
                       >
                         Delete
                       </Button>
@@ -174,7 +172,7 @@ const RecruiterDashboard = () => {
 
                     <AlertDialogOverlay className="bg-black/40 backdrop-blur-sm" />
 
-                    <AlertDialogContent className="rounded-2xl bg-white border border-gray-200 shadow-2xl backdrop-blur-none">
+                    <AlertDialogContent className="rounded-2xl bg-white border border-gray-200 shadow-2xl">
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Job Post?</AlertDialogTitle>
 

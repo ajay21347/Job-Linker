@@ -1,6 +1,7 @@
 import express from "express";
 import {
   changePassword,
+  deleteProfilePic,
   forgotPassword,
   getAllUsers,
   login,
@@ -31,6 +32,7 @@ router.put(
   upload.single("profilePic"),
   uploadProfilePic,
 );
+router.delete("/delete-profile-pic", protect, deleteProfilePic);
 router.put("/change-password", protect, changePassword);
 
 export default router;

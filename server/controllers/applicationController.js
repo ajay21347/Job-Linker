@@ -101,7 +101,7 @@ export const getMyApplications = async (req, res) => {
     const applications = await ApplicationModel.find({
       applicant: req.user.id,
     })
-      .populate("job")
+      .populate("job", "title company location")
       .sort({ createdAt: -1 });
 
     const updatedCount = applications.filter(
@@ -201,6 +201,21 @@ export const updateApplicationStatus = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Application not found",
+      });
+    }
+
+    const validStatuses = [
+      "Applied",
+      "Under Review",
+      "Shortlisted",
+      "Interview Scheduled",
+      "Selected",
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status",
       });
     }
 

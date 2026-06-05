@@ -35,12 +35,7 @@ const Applicants = () => {
     try {
       await api.put(`/application/update-status/${id}`, { status });
 
-      if (status === "accepted") {
-        toast.success("Applicant accepted");
-      }
-      if (status === "rejected") {
-        toast.success("Applicant rejected");
-      }
+      toast.success(`Status updated to ${status}`);
 
       setApplications((prev) =>
         prev.map((app) =>
@@ -69,17 +64,27 @@ const Applicants = () => {
     if (sortBy === "alphabetical") {
       return a.applicant?.name.localeCompare(b.applicant?.name);
     }
-    if (sortBy === "accepted") {
-      return a.status === "accepted" ? -1 : 1;
-    }
-    if (sortBy === "rejected") {
-      return a.status === "rejected" ? -1 : 1;
-    }
-    if (sortBy === "pending") {
-      return a.status === "pending" ? -1 : 1;
+    if (
+      [
+        "Applied",
+        "Under Review",
+        "Shortlisted",
+        "Interview Scheduled",
+        "Selected",
+      ].includes(sortBy)
+    ) {
+      return a.status === sortBy ? -1 : 1;
     }
     return 0;
   });
+
+  const statusStyles = {
+    Applied: "bg-blue-100 text-blue-700",
+    "Under Review": "bg-yellow-100 text-yellow-700",
+    Shortlisted: "bg-purple-100 text-purple-700",
+    "Interview Scheduled": "bg-indigo-100 text-indigo-700",
+    Selected: "bg-green-100 text-green-700",
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-6">
@@ -87,9 +92,6 @@ const Applicants = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-8">Applicants</h1>
-          <p className="text-gray-500 mt-1">
-            Manage applicants and hiring status
-          </p>
         </div>
         <div className="flex items-center gap-2 bg-white px-4 py-3 rounded-2xl shadow-md">
           <ArrowUpDown className="w-5 h-5 text-purple-600" />
@@ -101,9 +103,11 @@ const Applicants = () => {
             <option value="latest">Latest</option>
             <option value="oldest">Oldest</option>
             <option value="alphabetical">A-Z</option>
-            <option value="accepted">Accepted</option>
-            <option value="rejected">Rejected</option>
-            <option value="pending">Pending</option>
+            <option value="Applied">Applied</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Shortlisted">Shortlisted</option>
+            <option value="Interview Scheduled">Interview Scheduled</option>
+            <option value="Selected">Selected</option>
           </select>
         </div>
       </div>
@@ -199,42 +203,30 @@ const Applicants = () => {
                 >
                   {/* Status */}
                   <div>
-                    {app.status === "accepted" && (
-                      <span className="bg-green-100 text-green-700 px-5 py-2 rounded-full font-semibold">
-                        Accepted
-                      </span>
-                    )}
-                    {app.status === "rejected" && (
-                      <span className="bg-red-100 text-red-700 px-5 py-2 rounded-full font-semibold">
-                        Rejected
-                      </span>
-                    )}
-
-                    {(!app.status || app.status === "pending") && (
-                      <span className="bg-yellow-100 text-yellow-700 px-5 py-2 rounded-full font-semibold">
-                        Pending
-                      </span>
-                    )}
+                    <span
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                        statusStyles[app.status]
+                      }`}
+                    >
+                      {app.status}
+                    </span>
                   </div>
 
                   {/* Actions */}
-                  {(!app.status || app.status === "pending") && (
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={() => updateStatus(app._id, "accepted")}
-                        className="bg-green-600 hover:bg-green-700 rounded-xl"
-                      >
-                        Accept
-                      </Button>
 
-                      <Button
-                        onClick={() => updateStatus(app._id, "rejected")}
-                        className="bg-red-600 hover:bg-red-700 rounded-xl"
-                      >
-                        Reject
-                      </Button>
-                    </div>
-                  )}
+                  <select
+                    value={app.status}
+                    onChange={(e) => updateStatus(app._id, e.target.value)}
+                    className="border rounded-xl px-3 py-2 text-sm"
+                  >
+                    <option value="Applied">Applied</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="Shortlisted">Shortlisted</option>
+                    <option value="Interview Scheduled">
+                      Interview Scheduled
+                    </option>
+                    <option value="Selected">Selected</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>
