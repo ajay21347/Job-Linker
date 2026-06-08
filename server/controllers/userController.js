@@ -452,6 +452,7 @@ export const changePassword = async (req, res) => {
   }
 };
 
+//Delete Profile Picture
 export const deleteProfilePic = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);

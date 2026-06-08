@@ -1,12 +1,8 @@
 import api from "@/utils/api";
-import { Home, LogOut, User2, FileText, Bell, Sparkles } from "lucide-react";
-
+import { Home, LogOut, User2, Bell, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
-
 import { useLocation, useNavigate } from "react-router-dom";
-
 import { toast } from "sonner";
-
 import { useAiAssistant } from "@/context/AiAssistantContext";
 
 const Navbar = () => {
@@ -34,6 +30,24 @@ const Navbar = () => {
     }, 1000);
   };
 
+  const getNotifications = async () => {
+    try {
+      if (user?.role === "recruiter") {
+        if (newApplicants > 0) {
+          await api.put("/application/mark-recruiter-seen");
+
+          setNewApplicants(0);
+        }
+
+        navigate("/recruiter-notifications");
+      } else if (user?.role === "seeker") {
+        navigate("/my-applications");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to load  notifications ");
+    }
+  };
+
   const isActive = (path) => location.pathname === path;
 
   useEffect(() => {
@@ -56,7 +70,7 @@ const Navbar = () => {
     };
 
     fetchNotifications();
-  }, [location.pathname]);
+  }, [location.pathname, user?.role]);
 
   return (
     <div
@@ -68,7 +82,15 @@ const Navbar = () => {
 
       {/* Logo */}
       <h1
-        onClick={() => navigate("/seeker-dashboard")}
+        onClick={() => {
+          if (user?.role === "recruiter") {
+            navigate("/recruiter-dashboard");
+          } else if (user?.role === "admin") {
+            navigate("/admin-dashboard");
+          } else {
+            navigate("/seeker-dashboard");
+          }
+        }}
         className="relative text-2xl font-extrabold cursor-pointer bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent hover:scale-105 transition-all duration-300"
       >
         Job Linker
@@ -108,59 +130,34 @@ const Navbar = () => {
           <span className="font-semibold">Profile</span>
         </div>
 
-        {/* Applications */}
-        {user?.role === "seeker" && (
-          <div
-            onClick={() => navigate("/my-applications")}
-            className={`group relative flex items-center gap-2 cursor-pointer transition-all duration-300 hover:text-indigo-300 hover:scale-105 ${
-              isActive("/my-applications")
-                ? "text-emerald-300 drop-shadow-[0_0_10px_rgba(110,231,283,0.8)]"
-                : ""
-            }`}
-          >
-            <FileText className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+        {/* Notifications */}
+        <div
+          onClick={getNotifications}
+          className={`group flex items-center gap-2 cursor-pointer transition-all duration-300 hover:text-yellow-300 hover:scale-105 ${
+            isActive("/recruiter-notifications") || isActive("/my-applications")
+              ? "text-yellow-300"
+              : ""
+          }`}
+        >
+          <div className="relative">
+            <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
 
-            <span className="font-semibold">Applications</span>
+            {user?.role === "recruiter" && newApplicants > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center animate-pulse">
+                {newApplicants}
+              </span>
+            )}
 
-            {applicationCount > 0 && (
-              <span className="absolute -top-3 -right-4 bg-gradient-to-r from-pink-500 to-red-500 text-white text-[10px] font-bold min-w-[20px] h-[20px] flex items-center justify-center rounded-full animate-pulse shadow-lg shadow-red-500/30">
+            {user?.role === "seeker" && applicationCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center animate-pulse">
                 {applicationCount}
               </span>
             )}
           </div>
-        )}
 
-        {/* Recruiter Notifications */}
-        {user?.role === "recruiter" && (
-          <div
-            onClick={async () => {
-              try {
-                await api.put("/application/mark-recruiter-seen");
-
-                setNewApplicants(0);
-
-                navigate("/recruiter-notifications");
-              } catch (error) {
-                console.log(error);
-              }
-            }}
-            className={`group relative flex items-center gap-2 cursor-pointer transition-all duration-300 hover:text-yellow-300 hover:scale-105 ${
-              isActive("/recruiter-notifications") ? "text-yellow-300" : ""
-            }`}
-          >
-            <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-
-            <span className="font-semibold">Applicants</span>
-
-            {newApplicants > 0 && (
-              <span className="absolute -top-3 -right-4 bg-gradient-to-r from-pink-500 to-red-500 text-white text-[10px] font-bold min-w-[20px] h-[20px] flex items-center justify-center rounded-full animate-pulse shadow-lg shadow-red-500/30">
-                {newApplicants}
-              </span>
-            )}
-          </div>
-        )}
+          <span className="font-semibold">Notifications</span>
+        </div>
       </div>
-
       {/* Right Actions */}
       <div className="relative flex items-center gap-4">
         {/* AI Assistant */}

@@ -29,7 +29,7 @@ const Auth = () => {
     try {
       setLoading(true);
 
-      const res = await api.post("/user/forgot-password", {
+      await api.post("/user/forgot-password", {
         email: forgotEmail,
       });
 

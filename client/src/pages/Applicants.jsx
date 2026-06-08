@@ -25,7 +25,7 @@ const Applicants = () => {
         const res = await api.get(`/application/applicants/${jobId}`);
         setApplications(res.data.applications);
       } catch (error) {
-        toast.error("Failed to load applicants");
+        toast.error(error?.data?.message || "Failed to load applicants");
       }
     };
     fetchApplicants();
@@ -48,7 +48,7 @@ const Applicants = () => {
         ),
       );
     } catch (error) {
-      toast.error("Failed to update applicant status");
+      toast.error(error?.data?.message || "Failed to update applicant status");
     }
   };
 

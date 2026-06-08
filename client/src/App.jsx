@@ -1,6 +1,6 @@
 import Auth from "./pages/Auth";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import RecruiterDashboard from "./pages/RecruiterDashboard";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import SeekerDashboard from "./pages/SeekerDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -19,6 +19,11 @@ import HistoryCenter from "./pages/history/HistoryCenter";
 import AnalysisDetails from "./pages/history/AnalysisDetails";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
+import RecruiterLayout from "./pages/recruiter/RecruiterLayout";
+import DashboardOverview from "./pages/recruiter/Dashboard";
+import JobsManagement from "./pages/recruiter/JobsManagement";
+import ApplicantsManagement from "./pages/recruiter/ApplicantsManagement";
+import Analytics from "./pages/recruiter/Analytics";
 
 export const router = createBrowserRouter([
   {
@@ -36,16 +41,44 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/recruiter-dashboard",
     element: (
       <ProtectedRoute allowedRole="recruiter">
-        <>
-          <Navbar />
-          <RecruiterDashboard />
-        </>
+        <Navbar />
+        <RecruiterLayout />
       </ProtectedRoute>
     ),
+    children: [
+      {
+        index: true,
+        element: <DashboardOverview />,
+      },
+
+      {
+        path: "jobs",
+        element: <JobsManagement />,
+      },
+
+      {
+        path: "applicants",
+        element: <ApplicantsManagement />,
+      },
+      {
+        path: "create-job",
+        element: <CreateJob />,
+      },
+      {
+        path: "analytics",
+        element: <Analytics />,
+      },
+
+      {
+        path: "edit-job/:id",
+        element: <CreateJob />,
+      },
+    ],
   },
   {
     path: "/seeker-dashboard",
@@ -94,17 +127,7 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  {
-    path: "/create-job",
-    element: (
-      <ProtectedRoute allowedRole="recruiter">
-        <>
-          <Navbar />
-          <CreateJob />
-        </>
-      </ProtectedRoute>
-    ),
-  },
+
   {
     path: "/edit-job/:id",
     element: (

@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import api from "@/utils/api";
-import { Briefcase, Clock3 } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ import {
 const CreateJob = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -28,7 +30,10 @@ const CreateJob = () => {
   });
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
   useEffect(() => {
@@ -50,14 +55,17 @@ const CreateJob = () => {
           toast.error("Failed to load job");
         }
       };
+
       fetchJob();
     }
   }, [id]);
 
   const handleSubmit = async () => {
     if (
-      (!form.title.trim() || !form.company.trim() || !form,
-      location.trim() || !form.description.trim())
+      !form.title.trim() ||
+      !form.company.trim() ||
+      !form.location.trim() ||
+      !form.description.trim()
     ) {
       toast.warning("Please fill all required fields");
       return;
@@ -92,7 +100,7 @@ const CreateJob = () => {
         await api.post("/jobs/create", form);
 
         toast.dismiss(loadingToast);
-        toast.success("Job posted successfully ");
+        toast.success("Job posted successfully");
       }
 
       setTimeout(() => {
@@ -106,92 +114,151 @@ const CreateJob = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 p-6">
-      <Card className="w-full max-w-2xl shadow-xl bg-white/70 backdrop-blur-md border border-purple-200 transition-all duration-300 hover:shadow-2xl">
-        <CardContent className="p-6 flex flex-col gap-6 overflow-visible">
-          {/*Header*/}
-          <div className=" flex items-center gap-2 text-xl font-bold">
-            <Briefcase className="text-indigo-600" />
-            {id ? "Update Job" : "Post a Job"}
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8">
+      {/* Page Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <Briefcase className="w-8 h-8 text-indigo-600" />
 
-          {/* Form */}
-          <div className="grid md:grid-col-2 gap-4">
+          <h1 className="text-4xl font-bold text-gray-900">
+            {id ? "Update Job" : "Post a Job"}
+          </h1>
+        </div>
+      </div>
+
+      {/* Form Card */}
+      <Card className="w-full bg-white/80 backdrop-blur-md border border-indigo-200 shadow-lg rounded-2xl">
+        <CardContent className="p-10 flex flex-col gap-8 overflow-visible">
+          {/* Basic Fields */}
+          <div className="grid md:grid-cols-2 gap-6">
             <Input
               name="title"
-              placeholder="Title"
+              value={form.title}
+              placeholder="Job Title"
               onChange={handleChange}
-              className="bg-white/70 focus:ring-2 focus:ring-indigo-400 "
+              className="bg-white"
             />
+
             <Input
               name="company"
-              placeholder="Company"
+              value={form.company}
+              placeholder="Company Name"
               onChange={handleChange}
-              className="bg-white/70 focus:ring-2 focus:ring-indigo-400"
+              className="bg-white"
             />
+
             <Input
               name="location"
+              value={form.location}
               placeholder="Location"
               onChange={handleChange}
-              className="bg-white/70 focus:ring-2 focus:ring-indigo-400"
+              className="bg-white"
             />
+
             <Input
               name="salary"
               type="number"
+              value={form.salary}
               placeholder="Salary"
               onChange={handleChange}
-              className="bg-white/70 focus:ring-2 focus:ring-indigo-400"
+              className="bg-white"
             />
 
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-600">
-                Application Deadline
-              </label>
+            {/* Deadline */}
+            <div className="flex flex-col gap-2">
+              <Label>Application Deadline</Label>
+
               <Input
                 name="deadline"
                 type="date"
+                value={form.deadline}
                 onChange={handleChange}
-                className="bg-white/70 focus:ring-2 focus:ring-indigo-400"
+                className="bg-white"
               />
             </div>
-            <Select
-              onValueChange={(value) => setForm({ ...form, jobType: value })}
-            >
-              <SelectTrigger className="bg-white/70">
-                <SelectValue placeholder="Select Job Type" />
-              </SelectTrigger>
-              <SelectContent
-                position="popper"
-                className="z-50 bg-white shadow-lg border"
+
+            {/* Job Type */}
+            <div className="flex flex-col gap-2">
+              <Label>Job Type</Label>
+
+              <Select
+                value={form.jobType}
+                onValueChange={(value) =>
+                  setForm({
+                    ...form,
+                    jobType: value,
+                  })
+                }
               >
-                <SelectItem value="full-time">Full Time</SelectItem>
-                <SelectItem value="part-time">Part Time</SelectItem>
-                <SelectItem value="internship">Internship</SelectItem>
-                <SelectItem value="remote">Remote</SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectTrigger className="w-full bg-white h-12 text-base">
+                  <SelectValue placeholder="Select Job Type" />
+                </SelectTrigger>
+
+                <SelectContent
+                  position="popper"
+                  sideOffset={8}
+                  className="z-50 w-[--radix-select-trigger-width] bg-white border shadow-xl rounded-xl p-1"
+                >
+                  <SelectItem
+                    value="full-time"
+                    className="text-base py-2 px-3 rounded-md cursor-pointer"
+                  >
+                    Full Time
+                  </SelectItem>
+
+                  <SelectItem
+                    value="part-time"
+                    className="text-base py-2 px-3 rounded-md cursor-pointer"
+                  >
+                    Part Time
+                  </SelectItem>
+
+                  <SelectItem
+                    value="internship"
+                    className="text-base py-2 px-3 rounded-md cursor-pointer"
+                  >
+                    Internship
+                  </SelectItem>
+
+                  <SelectItem
+                    value="remote"
+                    className="text-base py-2 px-3 rounded-md cursor-pointer"
+                  >
+                    Remote
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <textarea
-            name="description"
-            placeholder="Job Description...."
-            onChange={handleChange}
-            className="w-full border rounded p-3 resize-none h-28 bg-white/70 focus:ring-2 focus:ring-indigo-400 relative z-0"
-          />
+          {/* Description */}
+          <div className="flex flex-col gap-2">
+            <Label>Job Description</Label>
 
-          <div className="flex justify-end gap-3">
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="Describe responsibilities, requirements, skills, benefits, etc."
+              className="w-full border rounded-xl p-4 resize-none min-h-[200px] bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
             <Button
               variant="outline"
               onClick={() => navigate(-1)}
-              className="bg-red-600 hover:bg-red-700 hover:scale-105 transition-all duration-200"
+              className="bg-red-600 text-white hover:bg-red-700 hover:scale-105 transition-all duration-200"
             >
               Cancel
             </Button>
+
             <Button
               onClick={handleSubmit}
-              className="bg-indigo-600 hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+              className="bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
             >
-              Post{" "}
+              {id ? "Update Job" : "Post Job"}
             </Button>
           </div>
         </CardContent>
