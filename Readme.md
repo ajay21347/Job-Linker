@@ -1,83 +1,180 @@
 # MERN Job Portal
 
-A full-stack MERN-based Job Portal application designed for recruiters and job seekers. The platform enables recruiters to post and manage jobs while allowing seekers to browse opportunities, apply for jobs, upload resumes, and track applications.
+A modern full-stack MERN-based Job Portal designed for recruiters and job seekers. The platform streamlines the recruitment process by allowing recruiters to post and manage jobs while enabling seekers to discover opportunities, upload resumes, apply for jobs, track applications, and leverage AI-powered career tools.
 
----
+## Features
 
-# Features
+### Authentication & Authorization
 
-## Authentication & Authorization
-
-* User registration and login
-* Role-based authentication (Recruiter / Seeker)
-* Protected routes using middleware
-* JWT-based authentication system
+- User Registration & Login
+- JWT-Based Authentication
+- Role-Based Access Control (Recruiter / Seeker / Admin)
+- Protected Routes & Middleware
+- Secure Session Management
 
 ## Recruiter Features
 
-* Create and manage job postings
-* View applicants for posted jobs
-* Recruiter dashboard
-* Applicant management system
-* Recruiter notification system
+### Recruiter Dashboard
+
+- Recruiter-specific dashboard
+- Real-time recruitment statistics
+- Total Jobs Posted
+- Total Applicants
+- Shortlisted Candidates Count
+- Selected Candidates Count
+
+### Job Management
+
+- Create Job Postings
+- Edit Existing Jobs
+- Delete Jobs with Confirmation Dialog
+- Manage Job Listings
+- Application Deadline Support
+- Job Type Selection (Full-Time, Part-Time, Internship, Remote)
+
+### Applicant Management
+
+- View Applicants Across All Jobs
+- Search Applicants
+- Applicant Status Tracking
+- View Candidate Resumes
+- Job-wise Applicant Management
+- Clickable Job Title Navigation to Job Details
+
+### Analytics Dashboard
+
+- Most Applied Job
+- Total Applications Received
+- Selected Candidates Analytics
+- Applications Per Job Statistics
+
+### Recruiter Notifications
+
+- Real-Time Applicant Notifications
+- Notification Badge Count
+- Read/Unread Notification Tracking
+- Dedicated Notification Center
 
 ## Job Seeker Features
 
-* Browse job listings
-* View detailed job information
-* Apply for jobs
-* Track submitted applications
-* Profile management
-* Resume upload support
+### Job Discovery
 
-## Resume Upload System
+- Browse Available Jobs
+- Search Job Opportunities
+- Detailed Job Information
+- Company Information Display
 
-* Resume upload using Multer
-* Cloudinary integration for cloud storage
-* Secure file handling
+### Application Management
+
+- Apply for Jobs
+- Track Application Status
+- Application History
+- Real-Time Status Updates
+- Application Notifications
+
+### Profile Management
+
+- Profile Editing
+- Resume Upload
+- Resume Management
+- Personal Information Management
+
+## AI-Powered Features
+
+### AI Resume Analysis
+
+- Resume Evaluation
+- ATS-Friendly Resume Suggestions
+- Resume Improvement Recommendations
+- Skills Gap Analysis
+
+### AI Mock Interview System
+
+- Job-Specific Interview Questions
+- AI-Generated Interview Sessions
+- Interview History Tracking
+- Interview Performance Analysis
+
+### AI Assistant
+
+- Integrated AI Career Assistant
+- Resume Guidance
+- Job Search Support
+- Interview Preparation Help
+
+## Resume Management System
+
+- Resume Upload Support
+- Cloudinary Storage Integration
+- Secure File Handling
+- Resume Preview Support
+- Recruiter Resume Access
+
+## Notification System
+
+### Recruiter Notifications
+
+- New Applicant Alerts
+- Applicant Activity Tracking
+- Notification Counter
+
+### Seeker Notifications
+
+- Application Status Updates
+- Recruiter Responses
+- Status Change Alerts
 
 ## Dashboard & Utilities
 
-* Recruiter dashboard
-* Seeker dashboard
-* Deadline calculations
-* Posted-time utilities
-* Responsive UI design
+- Recruiter Dashboard
+- Seeker Dashboard
+- Responsive Layouts
+- Analytics Overview
+- Job Statistics
+- Posted Time Utilities
+- Application Deadline Tracking
 
----
+## Tech Stack
 
-# Tech Stack
+### Frontend
 
-## Frontend
+- React.js
+- Vite
+- Tailwind CSS
+- Axios
+- React Router DOM
+- ShadCN UI
+- Lucide React Icons
+- Sonner Toast Notifications
 
-* React.js
-* Tailwind CSS
-* Vite
-* Axios
-* React Router DOM
-* ShadCN UI Components
+### Backend
 
-## Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT Authentication
+- Multer
+- Cloudinary
 
-* Node.js
-* Express.js
-* MongoDB
-* Mongoose
-* JWT Authentication
-* Multer
-* Cloudinary
+### AI Integration
 
----
+- Google Gemini API
+- Resume Analysis Engine
+- AI Interview Generation
 
-# Project Structure
+## Project Structure
 
-```bash
+```plaintext
 Job-Portal/
 │
 ├── client/
 │   ├── src/
 │   │   ├── components/
 │   │   ├── pages/
+│   │   ├── layouts/
+│   │   ├── context/
+│   │   ├── services/
 │   │   ├── utils/
 │   │   └── App.jsx
 │   │
@@ -90,103 +187,94 @@ Job-Portal/
 │   ├── models/
 │   ├── routes/
 │   ├── config/
+│   ├── utils/
 │   └── server.js
 │
 └── README.md
 ```
 
----
+## Implemented Modules
 
-# Implemented Modules
+### Authentication Module
 
-## Authentication Module
+- Login & Registration
+- JWT Verification
+- Role-Based Authorization
+- Protected Routes
 
-* Login/Register system
-* Protected routes
-* JWT verification
-* Role-based access control
+### Job Management Module
 
-## Job Management Module
+- Create Jobs
+- Edit Jobs
+- Delete Jobs
+- Job Details Page
+- Recruiter Job Management
 
-* Job creation
-* Job details page
-* Job APIs
-* Recruiter job management
+### Application Management Module
 
-## Application Management Module
+- Job Application System
+- Applicant Tracking
+- My Applications Dashboard
+- Recruiter Applicant Review
 
-* Job application system
-* Applicant tracking
-* My Applications page
-* Recruiter applicant review
+### Profile Management Module
 
-## Profile Management Module
+- User Profile
+- Resume Upload
+- Profile Updates
 
-* User profile page
-* Resume upload
-* Profile updates
+### Notification Module
 
-## Notification System
+- Recruiter Notifications
+- Application Status Notifications
+- Real-Time Notification Counters
 
-* Recruiter notifications
-* Application status updates
+### Analytics Module
 
----
+- Recruitment Statistics
+- Most Applied Job Analysis
+- Application Insights
 
-# Key Functionalities
+### AI Module
 
-## Recruiters Can
+- Resume Analyzer
+- Mock Interview Generator
+- AI Career Assistant
 
-* Post jobs
-* View applicants
-* Manage applications
-* Access recruiter dashboard
-* Receive notifications
+## REST API Features
 
-## Job Seekers Can
+- Authentication APIs
+- Job CRUD APIs
+- Application APIs
+- Recruiter Dashboard APIs
+- Analytics APIs
+- Notification APIs
+- Resume Upload APIs
+- Protected Middleware Routes
 
-* Search jobs
-* View job details
-* Apply for jobs
-* Upload resumes
-* Track applications
-* Manage profiles
+## UI Features
 
----
+- Modern Responsive Design
+- Recruiter Sidebar Navigation
+- Interactive Dashboard Cards
+- Search & Filter Components
+- Animated Notification System
+- Glassmorphism UI Elements
+- Reusable Component Architecture
 
-# API Features
+## Future Enhancements
 
-* RESTful API integration
-* Authentication middleware
-* CRUD operations for jobs and applications
-* File upload APIs
-* Protected backend routes
+- AI Job Recommendation System
+- AI Career Guidance Chatbot
+- Resume Builder
+- Email Notifications
+- Video Interview Platform
+- Advanced Recruiter Analytics
+- Admin Analytics Dashboard
+- Company Review System
+- Saved Jobs Feature
+- Job Recommendation Engine
 
----
+Author
 
-# UI Features
-
-* Responsive design
-* Tailwind CSS styling
-* Dashboard interfaces
-* Clean navigation system
-* Reusable UI components
-
-
----
-
-# Future Enhancements
-
-* AI Resume Analyzer
-* AI-based Job Recommendation System
-* AI Interview Preparation System
-* AI Career Guidance Chatbot
-* Resume Builder
-* Email notifications
-* Admin analytics dashboard
-
----
-
-# Author
-
-Developed by Ajay Bhandari
+Ajay Bhandari
