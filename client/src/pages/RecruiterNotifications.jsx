@@ -73,31 +73,35 @@ const RecruiterNotifications = () => {
                 navigate(`/applicants/${app.job._id}`);
               }
             }}
-            className={`cursor-pointer rounded-3xl border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${app.isSeen ? "bg-white" : "bg-purple-50 border border-purple-300"}`}
+            className={`cursor-pointer rounded-2xl border-0 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 ${
+              app.isSeen ? "bg-white" : "bg-purple-50 border border-purple-200"
+            }`}
           >
-            <CardContent className="p-6 flex items-center justify-between">
-              {/* Left */}
-
-              <div className="flex items-center gap-5">
-                <div className="bg-purple-100 p-4 rounded-2xl">
-                  <Briefcase className="w-7 h-7 text-purple-600" />
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-purple-100 p-2.5 rounded-xl flex-shrink-0">
+                  <Briefcase className="w-5 h-5 text-purple-600" />
                 </div>
+
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">
-                    New applicant for {app.job?.title}
+                  <h2 className="text-base font-semibold text-gray-800">
+                    New applicant for{" "}
+                    <span className="text-purple-600">{app.job?.title}</span>
                   </h2>
-                  <p className="text-gray-600 mt-1">
-                    Candidate applied to {app.job?.company}
+
+                  <p className="text-sm text-gray-500">
+                    Candidate applied • {app.job?.company}
                   </p>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+
+                  <p className="text-xs text-gray-400 mt-1">
                     {new Date(app.createdAt).toLocaleString()}
-                  </div>
+                  </p>
                 </div>
               </div>
-              {/* Badge */}
+
               {!app.isSeen && (
-                <span className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium animate-pulse">
-                  New
+                <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                  NEW
                 </span>
               )}
             </CardContent>

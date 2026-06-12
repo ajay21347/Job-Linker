@@ -124,6 +124,29 @@ const Profile = () => {
 
     if (!file) return;
 
+    const maxSize = 2 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+
+      toast.error(
+        `Selected image is ${sizeInMB} MB. Maximum allowed size is 2 MB.`,
+      );
+
+      e.target.value = "";
+
+      return;
+    }
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG and WEBP images are allowed.");
+
+      e.target.value = "";
+
+      return;
+    }
+
     setProfilePicFile(file);
   };
 
@@ -429,11 +452,22 @@ const Profile = () => {
               <div className="flex flex-col gap-2">
                 {profilePicFile && (
                   <>
-                    <img
-                      src={URL.createObjectURL(profilePicFile)}
-                      alt="Preview"
-                      className="w-20 h-20 rounded-full object-cover border "
-                    />
+                    <div className="relative w-fit">
+                      <img
+                        src={URL.createObjectURL(profilePicFile)}
+                        alt="Preview"
+                        className="w-20 h-20 rounded-full object-cover border"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setProfilePicFile(null)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 hover:scale-110 transition-all"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+
                     {profilePicLoading && (
                       <div className="w-full mt-2">
                         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -450,10 +484,11 @@ const Profile = () => {
                         </p>
                       </div>
                     )}
+
                     <Button
                       onClick={updateProfilePic}
                       disabled={profilePicLoading}
-                      className="bg-purple-600 hover:bg-purple-700 hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-purple-300 disabled:opacity-50 disabled:cursor-not-allowed  disabled:hover:scale-100 "
+                      className="bg-purple-600 hover:bg-purple-700 hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-purple-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                       {profilePicLoading ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -1,5 +1,5 @@
 import api from "@/utils/api";
-import { Home, LogOut, User2, Bell, Sparkles } from "lucide-react";
+import { Home, LogOut, User2, Bell, Sparkles, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -80,21 +80,32 @@ const Navbar = () => {
 
       <div className="absolute right-20 top-0 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
 
-      {/* Logo */}
-      <h1
-        onClick={() => {
-          if (user?.role === "recruiter") {
-            navigate("/recruiter-dashboard");
-          } else if (user?.role === "admin") {
-            navigate("/admin-dashboard");
-          } else {
-            navigate("/seeker-dashboard");
-          }
-        }}
-        className="relative text-2xl font-extrabold cursor-pointer bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent hover:scale-105 transition-all duration-300"
-      >
-        Job Linker
-      </h1>
+      <div className="flex items-center gap-4">
+        {/* Back */}
+        <button
+          onClick={() => navigate(-1)}
+          className="group relative overflow-hidden flex items-center justify-center bg-cyan-500/20 backdrop-blur-md border border-cyan-300/30 text-cyan-100 p-2.5 rounded-xl shadow-lg hover:bg-cyan-500/30 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-300/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+
+          <ArrowLeft className="relative z-10 w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
+        </button>
+        {/* Logo */}
+        <h1
+          onClick={() => {
+            if (user?.role === "recruiter") {
+              navigate("/recruiter-dashboard");
+            } else if (user?.role === "admin") {
+              navigate("/admin-dashboard");
+            } else {
+              navigate("/seeker-dashboard");
+            }
+          }}
+          className="relative text-2xl font-extrabold cursor-pointer bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent hover:scale-105 transition-all duration-300"
+        >
+          Job Linker
+        </h1>
+      </div>
 
       {/* Nav Items */}
       <div className="relative flex items-center gap-8">

@@ -23,7 +23,6 @@ import RecruiterLayout from "./pages/recruiter/RecruiterLayout";
 import DashboardOverview from "./pages/recruiter/Dashboard";
 import JobsManagement from "./pages/recruiter/JobsManagement";
 import ApplicantsManagement from "./pages/recruiter/ApplicantsManagement";
-import Analytics from "./pages/recruiter/Analytics";
 
 export const router = createBrowserRouter([
   {
@@ -68,10 +67,6 @@ export const router = createBrowserRouter([
       {
         path: "create-job",
         element: <CreateJob />,
-      },
-      {
-        path: "analytics",
-        element: <Analytics />,
       },
 
       {

@@ -28,11 +28,6 @@ const menuItems = [
     icon: PlusCircle,
     path: "/recruiter-dashboard/create-job",
   },
-  {
-    title: "Analytics",
-    icon: BarChart3,
-    path: "/recruiter-dashboard/analytics",
-  },
 ];
 
 const RecruiterSidebar = () => {
@@ -50,6 +45,7 @@ const RecruiterSidebar = () => {
             <NavLink
               key={item.path}
               to={item.path}
+              end={item.path === "/recruiter-dashboard"}
               className={({ isActive }) =>
                 `flex items-center gap-3 p-3 rounded-xl transition-all ${
                   isActive

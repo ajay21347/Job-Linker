@@ -16,13 +16,6 @@ import {
 } from "lucide-react";
 
 import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const DashboardOverview = () => {
   const [stats, setStats] = useState({
