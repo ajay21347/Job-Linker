@@ -52,7 +52,7 @@ const CreateJob = () => {
             deadline: res.data.job.deadline?.split("T")[0],
           });
         } catch (error) {
-          toast.error("Failed to load job");
+          toast.error(error?.data?.message || "Failed to load job");
         }
       };
 
@@ -136,7 +136,7 @@ const CreateJob = () => {
               value={form.title}
               placeholder="Job Title"
               onChange={handleChange}
-              className="bg-white"
+              className="bg-white  focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
 
             <Input
@@ -144,7 +144,7 @@ const CreateJob = () => {
               value={form.company}
               placeholder="Company Name"
               onChange={handleChange}
-              className="bg-white"
+              className="bg-white  focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
 
             <Input
@@ -152,7 +152,7 @@ const CreateJob = () => {
               value={form.location}
               placeholder="Location"
               onChange={handleChange}
-              className="bg-white"
+              className="bg-white  focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
 
             <Input
@@ -161,7 +161,7 @@ const CreateJob = () => {
               value={form.salary}
               placeholder="Salary"
               onChange={handleChange}
-              className="bg-white"
+              className="bg-white  focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
 
             {/* Deadline */}
@@ -173,7 +173,7 @@ const CreateJob = () => {
                 type="date"
                 value={form.deadline}
                 onChange={handleChange}
-                className="bg-white"
+                className="bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
 
