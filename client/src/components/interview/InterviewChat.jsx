@@ -17,7 +17,9 @@ const InterviewChat = ({ messages }) => {
           className={`max-w-[75%] px-5 py-4 rounded-3xl shadow-lg ${
             msg.role === "user"
               ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white self-end"
-              : "bg-white text-gray-800 self-start"
+              : msg.type === "feedback"
+                ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white self-start"
+                : "bg-white text-gray-800 self-start"
           } `}
         >
           <p className="leading-7 whitespace-pre-wrap">{msg.content}</p>

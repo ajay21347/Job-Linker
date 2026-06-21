@@ -1,12 +1,20 @@
 import InterviewChat from "@/components/interview/InterviewChat";
 import InterviewHeader from "@/components/interview/InterviewHeader";
 import InterviewInput from "@/components/interview/InterviewInput";
+import useInterviewRecording from "@/hooks/useInterviewRecording";
 import api from "@/utils/api";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
+import InterviewComplete from "@/components/interview/InterviewComplete";
+import InterviewCamera from "@/components/interview/InterviewCamera";
+import InterviewStartScreen from "@/components/interview/InterviewStartScreen";
+
+import ExitInterviewDialog from "@/components/interview/ExitInterviewDialog";
+
 const MockInterview = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
   const [messages, setMessages] = useState([]);
 
   const [currentAnswer, setCurrentAnswer] = useState("");
@@ -43,11 +51,57 @@ const MockInterview = () => {
 
   const [showContinuePrompt, setShowContinuePrompt] = useState(false);
 
-  const navigate = useNavigate();
+  const {
+    videoRef,
+
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+  } = useInterviewRecording();
+
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  useEffect(() => {
+    if (!voiceEnabled) {
+      speechSynthesis.cancel();
+    }
+  }, [voiceEnabled]);
+
+  useEffect(() => {
+    return () => {
+      speechSynthesis.cancel();
+    };
+  }, []);
+
+  const [interviewStarted, setInterviewStarted] = useState(false);
+
+  const [paused, setPaused] = useState(false);
+
+  const [cameraEnabled, setCameraEnabled] = useState(false);
+
+  const [interviewEnded, setInterviewEnded] = useState(false);
+
+  const downloadTranscript = () => {
+    const content = messages
+      .map((msg) => `${msg.role.toUpperCase()}\n${msg.content}\n`)
+      .join("\n");
+
+    const blob = new Blob([content], {
+      type: "text/plain",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `${interviewId}.txt`;
+    a.click();
+  };
 
   //Speak Question
   const speakQuestion = (text) => {
-    if (!micEnabled) return;
+    if (!voiceEnabled || paused) return;
 
     speechSynthesis.cancel();
 
@@ -57,6 +111,7 @@ const MockInterview = () => {
 
     utterance.rate = 1;
     utterance.pitch = 1;
+    utterance.volume = 1;
     utterance.onend = () => {
       setAiSpeaking(false);
     };
@@ -64,65 +119,115 @@ const MockInterview = () => {
     speechSynthesis.speak(utterance);
   };
 
-  // Start Interview
-  useEffect(() => {
-    const startInterview = async () => {
-      try {
-        const res = await api.post("/interview/start", { jobId });
+  const startInterviewHandler = async () => {
+    try {
+      setInterviewStarted(true);
 
-        setDbInterviewId(res.data.interviewId);
+      await startRecording();
 
-        setQuestionSet(res.data.questions);
-        setAllQuestions(res.data.questions);
+      const res = await api.post("/interview/start", {
+        jobId,
+      });
 
-        const introMessage = {
+      setDbInterviewId(res.data.interviewId);
+
+      setQuestionSet(res.data.questions);
+
+      setAllQuestions(res.data.questions);
+
+      const introMessage = {
+        role: "assistant",
+        content: `
+Hello ${user?.name?.split(" ")[0] || ""}
+
+I am your AI Interviewer today.
+
+This is a mock interview for the role of ${res.data.jobTitle}.
+
+Let's begin.
+`,
+      };
+
+      setMessages([introMessage]);
+
+      setTimeout(() => {
+        const firstQuestion = {
           role: "assistant",
-
-          content: `
-        
-        Hello 👋
-
-        I am your AI Interviewer today.
-
-        This is a mock interview for the role of ${res.data.jobTitle}.
-
-        I will ask technical, HR and project-based questions.
-
-        Please answer confidently.
-
-        Let's begin.`,
+          content: res.data.questions[0],
         };
-        setMessages([introMessage]);
 
-        speakQuestion(introMessage.content);
+        setMessages((prev) => [...prev, firstQuestion]);
+      }, 5000);
 
-        setTimeout(() => {
-          const firstQuestion = {
-            role: "assistant",
-            content: res.data.questions[0],
-          };
-          setMessages((prev) => [...prev, firstQuestion]);
+      setJobRole(res.data.jobTitle);
+    } catch {
+      toast.error("Failed to start interview");
+    }
+  };
 
-          speakQuestion(res.data.questions[0]);
-        }, 5000);
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
 
-        setDbInterviewId(res.data.interviewId);
-        setJobRole(res.data.jobTitle);
-      } catch (error) {
-        toast.error("Failed to start interview");
-      }
-    };
-    startInterview();
-  }, []);
+    if (
+      lastMessage &&
+      lastMessage.role === "assistant" &&
+      voiceEnabled &&
+      !paused
+    ) {
+      speakQuestion(lastMessage.content);
+    }
+  }, [messages]);
 
   // Timer
   useEffect(() => {
+    if (paused) return;
+
     const interval = setInterval(() => {
       setTimer((prev) => prev + 1);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [paused]);
+
+  const handlePause = () => {
+    if (!paused) {
+      speechSynthesis.pause();
+
+      pauseRecording();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "system",
+          content: " ⏸Interview Paused",
+        },
+      ]);
+    } else {
+      speechSynthesis.resume();
+
+      resumeRecording();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "system",
+          content: "▶  Interview Resumed",
+        },
+      ]);
+    }
+
+    setPaused(!paused);
+  };
+
+  const handleExitInterview = async () => {
+    speechSynthesis.cancel();
+
+    stopRecording();
+
+    await saveInterview(messages, true);
+
+    setInterviewEnded(true);
+  };
 
   //Save Interview
   const saveInterview = async (
@@ -147,6 +252,11 @@ const MockInterview = () => {
 
   // Submit Answer
   const handleSubmit = async () => {
+    if (paused) {
+      toast.warning("Interview is paused");
+      return;
+    }
+
     if (!currentAnswer.trim()) {
       toast.warning("Please enter an answer");
       return;
@@ -211,10 +321,8 @@ const MockInterview = () => {
           },
         ]);
 
-        speakQuestion(nextQuestion);
-
         setCurrentQuestionIndex(nextIndex);
-      }, 3000);
+      }, 7000);
     } catch (error) {
       toast.error("Failed to generate  feedback");
     } finally {
@@ -247,13 +355,52 @@ const MockInterview = () => {
         },
         { role: "assistant", content: res.data.questions[0] },
       ]);
-      speakQuestion(res.data.questions[0]);
     } catch (error) {
       toast.error("Failed to generate more questions");
     }
   };
 
+  const viewTranscript = () => {
+    const transcriptWindow = window.open("", "_blank");
+
+    transcriptWindow.document.write(`
+    <html>
+      <head>
+        <title>Interview Transcript</title>
+        <style>
+          body{
+            font-family:Arial,sans-serif;
+            padding:40px;
+            background:#f8fafc;
+          }
+          .message{
+            margin-bottom:20px;
+            padding:15px;
+            border-radius:10px;
+            background:white;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Interview Transcript</h1>
+
+        ${messages
+          .map(
+            (msg) => `
+              <div class="message">
+                <strong>${msg.role}</strong>
+                <p>${msg.content}</p>
+              </div>
+            `,
+          )
+          .join("")}
+      </body>
+    </html>
+  `);
+  };
+
   const handleFinish = async () => {
+    speechSynthesis.cancel();
     setShowContinuePrompt(false);
 
     toast.success("Interview Completed");
@@ -269,42 +416,52 @@ const MockInterview = () => {
       saveInterview(updated);
       return updated;
     });
-    setInterviewCompleted(true);
+    stopRecording();
+
+    setInterviewEnded(true);
   };
+
+  useEffect(() => {
+    if (timer >= 900) {
+      handleExitInterview();
+    }
+  }, [timer]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      speechSynthesis.cancel();
+      stopRecording();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+  if (!interviewStarted) {
+    return <InterviewStartScreen onStart={startInterviewHandler} />;
+  }
+
+  if (interviewEnded) {
+    return (
+      <>
+        <InterviewComplete
+          downloadTranscript={downloadTranscript}
+          viewTranscript={viewTranscript}
+        />
+      </>
+    );
+  }
 
   return (
     <>
-      {showExitDialog && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-          <div
-            className={`w-[400px] rounded-3xl p-8 shadow-2xl ${darkMode ? "bg-slate-900 text-white" : "bg-white text-black"}`}
-          >
-            <h2 className="text-2xl font-bold mb-3">Exit Interview</h2>
-            <p className="text-gray-400 mb-6">
-              Your current interview progress may be lost.
-            </p>
+      <ExitInterviewDialog
+        open={showExitDialog}
+        onCancel={() => setShowExitDialog(false)}
+        onConfirm={handleExitInterview}
+      />
 
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowExitDialog(false)}
-                className="px-5 py-2 rounded-xl border"
-              >
-                No
-              </button>{" "}
-              <button
-                onClick={async () => {
-                  speechSynthesis.cancel();
-                  await saveInterview(messages, true);
-                  navigate(-1);
-                }}
-                className="px-5 py-2 rounded-xl bg-red-500 text-white"
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <div
         className={`h-screen flex flex-col  transition-all duration-500 ${darkMode ? "bg-gradient-to-br from-[#0f172a] via-[#111827] to-[#1e293b]" : "bg-gradient-to-br from-slate-100 via-blue-100 to-cyan-100"}`}
       >
@@ -315,6 +472,12 @@ const MockInterview = () => {
           timer={timer}
           micEnabled={micEnabled}
           setMicEnabled={setMicEnabled}
+          voiceEnabled={voiceEnabled}
+          setVoiceEnabled={setVoiceEnabled}
+          paused={paused}
+          setPaused={handlePause}
+          cameraEnabled={cameraEnabled}
+          setCameraEnabled={setCameraEnabled}
           darkMode={darkMode}
           setDarkMode={setDarkMode}
           onExit={() => {
@@ -331,6 +494,12 @@ const MockInterview = () => {
             <span className="text-purple-400 font-medium text-sm">
               AI Speaking...
             </span>
+          </div>
+        )}
+
+        {cameraEnabled && (
+          <div className="fixed bottom-6 right-6 z-50">
+            <InterviewCamera videoRef={videoRef} />
           </div>
         )}
 

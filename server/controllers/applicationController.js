@@ -98,11 +98,13 @@ export const checkApplied = async (req, res) => {
 
 export const getMyApplications = async (req, res) => {
   try {
-    const applications = await ApplicationModel.find({
-      applicant: req.user.id,
-    })
-      .populate("job", "title company location")
-      .sort({ createdAt: -1 });
+    const applications = (
+      await ApplicationModel.find({
+        applicant: req.user.id,
+      })
+        .populate("job", "title company location")
+        .sort({ createdAt: -1 })
+    ).filter((app) => app.job);
 
     const updatedCount = applications.filter(
       (app) => app.isUpdated === true,
@@ -124,6 +126,7 @@ export const getMyApplications = async (req, res) => {
       updatedCount,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,

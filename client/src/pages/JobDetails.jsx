@@ -246,9 +246,21 @@ const JobDetails = () => {
 
                 <Button
                   onClick={() => {
-                    toast.success("Starting AI Mock Interview");
+                    toast.info(
+                      " AI Mock Interview will open in a new tab in 3 seconds",
+                      {
+                        description:
+                          "The mock interview will open in a new tab.",
+                      },
+                    );
 
-                    navigate(`/mock-interview/${job._id}`);
+                    setTimeout(() => {
+                      window.open(
+                        `/mock-interview/${job._id}`,
+                        "_blank",
+                        "noopener,noreferrer",
+                      );
+                    }, 3000);
                   }}
                   className="  bg-gradient-to-r from-fuchsia-500 to-indigo-500 hover:from-fuchsia-600 hover:to-indigo-600 px-6 py-3 text-white font-bold shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2"
                 >

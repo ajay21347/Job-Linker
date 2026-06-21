@@ -56,6 +56,12 @@ const InterviewInput = ({
       <textarea
         value={currentAnswer}
         onChange={(e) => setCurrentAnswer(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
         className={`flex-1 rounded-2xl p-4 outline-none resize-none h-24 transition-all duration-500 ${
           darkMode
             ? "bg-slate-800 border border-slate-700 text-white placeholder:text-gray-400"

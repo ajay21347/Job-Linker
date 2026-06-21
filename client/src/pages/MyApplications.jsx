@@ -7,7 +7,6 @@ import {
   Briefcase,
   CheckCircle2,
   Clock3,
-  XCircle,
   BellRing,
   CalendarDays,
   Building2,
@@ -15,6 +14,13 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -69,26 +75,19 @@ const MyApplications = () => {
   }, []);
 
   // Sorting
-  const sortedApplications = [...applications].sort((a, b) => {
+  const filteredApplications = applications.filter((app) => {
+    if (sortBy === "latest" || sortBy === "oldest") return true;
+
+    return app.status === sortBy;
+  });
+
+  const sortedApplications = [...filteredApplications].sort((a, b) => {
     if (sortBy === "latest") {
       return new Date(b.createdAt) - new Date(a.createdAt);
     }
 
     if (sortBy === "oldest") {
       return new Date(a.createdAt) - new Date(b.createdAt);
-    }
-
-    if (
-      [
-        "Applied",
-        "Under Review",
-        "Shortlisted",
-        "Interview Scheduled",
-        "Selected",
-        "Rejected",
-      ].includes(sortBy)
-    ) {
-      return a.status === sortBy ? -1 : 1;
     }
 
     return 0;
@@ -136,55 +135,51 @@ const MyApplications = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 ">
       {/* Main Container */}
-      <div className="max-w-6xl mx-auto p-6 md:p-8">
+      <div className="max-w-5xl mx-auto p-5 md:p-">
         {/* Header */}
-        <div className="relative mb-10">
-          <div className=" text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-              My Applications
-            </h1>
-          </div>
+        <div className="relative mb-8">
+          {/* Center Title */}
+          <h1 className="text-5xl font-bold text-gray-800 text-center">
+            My Applications
+          </h1>
 
-          {/* Actions */}
-          <div className="absolute right-0 top-0 flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-white px-4 py-3 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+          {/* Sort Dropdown */}
+          <div className="absolute -right-20 top-1/2 -translate-y-1/2">
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl shadow-md border border-gray-100">
               <ArrowUpDown className="w-5 h-5 text-blue-600" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-blue-50 border border-blue-200 text-blue-700 font-medium rounded-xl px-3 py-2 outline-none cursor-pointer hover:border-blue-400 transition-all duration-300"
-              >
-                <option value="latest">Latest</option>
-                <option value="oldest">Oldest</option>
-                <option value="Applied">Applied</option>
-                <option value="Under Review">Under Review</option>
-                <option value="Shortlisted">Shortlisted</option>
-                <option value="Interview Scheduled">Interview Scheduled</option>
-                <option value="Selected">Selected</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-            {/* Notifications */}
-            <div className="relative bg-white p-3 rounded-3xl shadow-md border border-gray-100">
-              <BellRing className="w-6 h-6 text-red-600 bell-hover cursor-pointer" />
 
-              {notifications > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs min-w-[22px] h-[22px] flex items-center justify-center rounded-full animate-pulse shadow-lg">
-                  {notifications}
-                </span>
-              )}
+              <Select
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value)}
+              >
+                <SelectTrigger className="w-[220px] border-blue-200 text-blue-700 font-medium">
+                  <SelectValue placeholder="Sort Applications" />
+                </SelectTrigger>
+
+                <SelectContent className="bg-white/95 backdrop-blur-md border border-gray-200 shadow-xl">
+                  <SelectItem value="latest">Latest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="Applied">Applied</SelectItem>
+                  <SelectItem value="Under Review">Under Review</SelectItem>
+                  <SelectItem value="Shortlisted">Shortlisted</SelectItem>
+                  <SelectItem value="Interview Scheduled">
+                    Interview Scheduled
+                  </SelectItem>
+                  <SelectItem value="Selected">Selected</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
       </div>
       {/* Top Stats Bar */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8 mt-10">
         {/* Total Applications */}
-        <div className="bg-white rounded-3xl shadow-lg p-5 border border-purple-100">
+        <div className="bg-white rounded-2xl shadow-md p-4 border border-purple-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Applications</p>
-              <h2 className="text-3xl font-bold">{applications.length}</h2>
+              <h2 className="text-2xl font-bold">{applications.length}</h2>
             </div>
 
             <div className="bg-purple-100 p-3 rounded-2xl">
@@ -194,14 +189,14 @@ const MyApplications = () => {
         </div>
 
         {/* Applied */}
-        <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-3xl shadow-lg p-5 text-white">
+        <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl shadow-md p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm">Applied</p>
               <h2 className="text-3xl font-bold mt-2">{applied}</h2>
             </div>
 
-            <Clock3 className="w-8 h-8" />
+            <Clock3 className="w-6 h-6" />
           </div>
         </div>
 
@@ -250,11 +245,11 @@ const MyApplications = () => {
               app.isUpdated ? "ring-2 ring-purple-400 bg-purple-50" : "bg-white"
             }`}
           >
-            <CardContent className="p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-2">
+            <CardContent className="p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-2 min-h-[100px]">
               {/* Left */}
               <div className="flex items-start gap-5">
-                <div className="bg-purple-100 p-3 rounded-xl">
-                  <Building2 className="w-6 h-6 text-purple-600" />
+                <div className="bg-purple-100 p-2 rounded-lg">
+                  <Building2 className="w-5 h-5 text-purple-600" />
                 </div>
 
                 <div>
@@ -263,16 +258,18 @@ const MyApplications = () => {
                       🔔 Status Updated
                     </div>
                   )}{" "}
-                  <h2 className="text-lg font-bold text-gray-800">
-                    {app.job.title}
+                  <h2 className="text-base font-bold text-gray-800">
+                    {app.job?.title || "Job No Longer Available"}
                   </h2>
                   <p
                     className="text-gray-600 font-medium mt-1
                   "
                   >
-                    {app.job.company}
+                    {app.job?.company || "-"}
                   </p>
-                  <p className="text-sm text-gray-500">{app.job.location}</p>
+                  <p className="text-sm text-gray-500">
+                    {app.job?.location || "-"}
+                  </p>
                   <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
                     <CalendarDays className="w-4 h-4" />
 
@@ -301,7 +298,10 @@ const MyApplications = () => {
                 })()}
                 {/* View */}
                 <button
-                  onClick={() => navigate(`/job/${app.job._id}`)}
+                  onClick={() =>
+                    app.job?._id && navigate(`/job/${app.job._id}`)
+                  }
+                  disabled={!app.job}
                   className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-2xl transition-all duration-300 shadow-lg hover:scale-105"
                 >
                   <Eye className="w-4 h-4" />
